@@ -3,7 +3,7 @@ import { ComponentRegistry } from "./components";
 import { resolveStyles } from "./styles";
 import { resolveTokens } from "./tokens";
 import { nodeToRecord, TraverseCtx } from "./traverse";
-import { ExportBundle, ExportOptions, ViewRecord } from "./types";
+import { ExportBundle, ExportOptions, NodeRecord, ViewRecord } from "./types";
 
 type Progress = (message: string, pct?: number) => void;
 
@@ -39,6 +39,19 @@ function targetsForScope(scope: ExportOptions["scope"]): SceneNode[] {
       return out;
     }
   }
+}
+
+function buildNodeIndex(views: ViewRecord[]): Record<string, string> {
+  const index: Record<string, string> = {};
+  function walk(node: NodeRecord, viewId: string) {
+    index[node.id.replace(/:/g, "-")] = viewId;
+    for (const child of node.children || []) walk(child, viewId);
+  }
+  for (const view of views) {
+    const viewId = String(view.nodeId).replace(/:/g, "-");
+    walk(view.tree, viewId);
+  }
+  return index;
 }
 
 function pageNameOf(node: BaseNode): string {
@@ -113,6 +126,7 @@ export async function buildBundle(
     components: registry.all(),
     views,
     assets: assets.list(),
+    nodeIndex: buildNodeIndex(views),
   };
   return bundle;
 }

@@ -554,22 +554,22 @@
   async function exportAsset(node, rec, ctx) {
     const isFrame = node.type === "FRAME" || node.type === "COMPONENT" || node.type === "COMPONENT_SET";
     if (ctx.options.assetMode === "settings-only") {
-      if (!isFrame && hasDesignerExportSettings(node)) {
+      if (hasDesignerExportSettings(node)) {
         const { primaryPath, assets } = await ctx.assets.exportFromSettings(node);
         if (primaryPath) {
           rec.asset = primaryPath;
           if (assets) rec.assets = assets;
-          return true;
+          if (!isFrame) return true;
         }
       }
       return false;
     }
-    if (!isFrame && hasDesignerExportSettings(node)) {
+    if (hasDesignerExportSettings(node)) {
       const { primaryPath, assets } = await ctx.assets.exportFromSettings(node);
       if (primaryPath) {
         rec.asset = primaryPath;
         if (assets) rec.assets = assets;
-        return true;
+        if (!isFrame) return true;
       }
     }
     if (hasImageFill(node)) {
@@ -693,6 +693,18 @@
       }
     }
   }
+  function buildNodeIndex(views) {
+    const index = {};
+    function walk(node, viewId) {
+      index[node.id.replace(/:/g, "-")] = viewId;
+      for (const child of node.children || []) walk(child, viewId);
+    }
+    for (const view of views) {
+      const viewId = String(view.nodeId).replace(/:/g, "-");
+      walk(view.tree, viewId);
+    }
+    return index;
+  }
   function pageNameOf(node) {
     let p = node;
     while (p && p.type !== "PAGE") p = p.parent;
@@ -747,13 +759,14 @@
       styles: styles.bundle,
       components: registry.all(),
       views,
-      assets: assets.list()
+      assets: assets.list(),
+      nodeIndex: buildNodeIndex(views)
     };
     return bundle;
   }
 
   // src/code.ts
-  figma.showUI(__html__, { width: 360, height: 560, themeColors: true });
+  figma.showUI(__html__, { width: 360, height: 580, themeColors: true });
   async function collectModes() {
     const collections = await figma.variables.getLocalVariableCollectionsAsync();
     const names = /* @__PURE__ */ new Set();

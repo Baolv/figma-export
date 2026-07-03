@@ -26,7 +26,8 @@ echo '{"exportsDir":"/your/custom/path"}' > ~/.figma-export.json
 1. **Parse** `<file_key>` and `<id>` from the URL. The node-id uses `-` (e.g. `456-789`) — use it verbatim as the filename.
 2. **Locate** the export folder: `<exportsDir>/<file_key>/`
 3. **Read** the design data:
-   - `views/<node-id>.json` — the specific screen's tree (layout, spacing, text).
+   - Try `views/<node-id>.json` first — the specific screen's tree (layout, spacing, text).
+   - If that file doesn't exist, open `node-index.json` and look up `<node-id>` to get the containing view file id, then read `views/<containing-id>.json` and walk the tree until `node.id` matches (node ids in the tree use `:`, the index and filenames use `-`).
    - `tokens.json` — design tokens (colors, spacing, radius, typography) per mode.
    - `components.json` — component definitions referenced by the view.
    - `styles.json` — color/text/effect styles.

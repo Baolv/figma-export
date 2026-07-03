@@ -158,4 +158,6 @@ export interface ExportBundle {
   components: Record<string, ComponentRecord>; // keyed by component id
   views: ViewRecord[];
   assets: AssetRecord[];
+  // flat map of every node id (colon replaced by dash) -> view file id that contains it
+  nodeIndex: Record<string, string>;
 }

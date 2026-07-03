@@ -226,25 +226,27 @@ async function exportAsset(
   // Export ONLY nodes the designer explicitly marked in Figma's Export panel.
   // Format and scale come from Figma — no plugin config needed.
   if (ctx.options.assetMode === "settings-only") {
-    if (!isFrame && hasDesignerExportSettings(node)) {
+    if (hasDesignerExportSettings(node)) {
       const { primaryPath, assets } = await ctx.assets.exportFromSettings(node);
       if (primaryPath) {
         rec.asset = primaryPath;
         if (assets) rec.assets = assets;
-        return true; // leaf
+        // Frames still walk children even when exported — non-frames are leaves.
+        if (!isFrame) return true;
       }
     }
     return false; // walk children
   }
 
   // ── Mode: auto ────────────────────────────────────────────────────────────
-  // Priority 1 — designer export settings (non-frame nodes only).
-  if (!isFrame && hasDesignerExportSettings(node)) {
+  // Priority 1 — designer export settings (any node type, including frames).
+  if (hasDesignerExportSettings(node)) {
     const { primaryPath, assets } = await ctx.assets.exportFromSettings(node);
     if (primaryPath) {
       rec.asset = primaryPath;
       if (assets) rec.assets = assets;
-      return true;
+      // Frames still walk children — non-frames are leaves.
+      if (!isFrame) return true;
     }
   }
 

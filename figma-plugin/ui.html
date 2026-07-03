@@ -111,10 +111,9 @@
     <fieldset>
       <legend>Scope</legend>
       <select id="scope">
-        <option value="top-frames">All top-level frames (this page)</option>
-        <option value="selection">Current selection</option>
         <option value="page">Everything on this page</option>
-        <option value="file">All frames in the file</option>
+        <option value="selection">Current selection</option>
+        <option value="file">Everything in this file</option>
       </select>
     </fieldset>
 
@@ -278,6 +277,10 @@
         for (const view of (bundle.views || [])) {
           const nodeId = String(view.nodeId).replace(/:/g, "-");
           files[prefix + "views/" + nodeId + ".json"] = fflate.strToU8(JSON.stringify(view, null, 2));
+        }
+
+        if (bundle.nodeIndex) {
+          files[prefix + "node-index.json"] = fflate.strToU8(JSON.stringify(bundle.nodeIndex, null, 2));
         }
 
         for (const asset of (bundle.assets || [])) {
