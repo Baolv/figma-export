@@ -219,7 +219,9 @@ Check that `~/.figma-export.json` has the correct path and that you actually mov
 
 ## For developers
 
-If you want to modify the plugin source:
+The plugin is pre-built — normal users don't need this section.
+
+If you modify the TypeScript source under `figma-plugin/src/`, recompile before testing:
 
 ```bash
 cd figma-plugin
@@ -227,4 +229,4 @@ npm install
 npm run build    # compiles src/code.ts → code.js
 ```
 
-The writer server (`writer/server.js`) is kept for CLI power users who prefer the old server-based workflow. Run it with `node writer/server.js` — it receives the export bundle via HTTP POST and writes it to disk automatically.
+Figma picks up the updated `code.js` automatically on the next plugin run.
