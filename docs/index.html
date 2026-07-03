@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Export for AI Agents — Documentation</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #7c6ff7;
+      --accent2: #4fc4f4;
+      --green: #3dd68c;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --text: #e8eaf6;
+      --text2: #8b91b5;
+      --text3: #5a6080;
+      --code-bg: #12141f;
+      --radius: 10px;
+      font: 15px/1.6 'Inter', -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Layout */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+      background: var(--surface); border-right: 1px solid var(--border);
+      padding: 28px 0; overflow-y: auto; z-index: 10;
+    }
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo .logo-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 8px;
+    }
+    .sidebar-logo h2 { font-size: 13px; font-weight: 600; color: var(--text); }
+    .sidebar-logo p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .nav-section { padding: 4px 12px; margin-bottom: 4px; }
+    .nav-section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text3); padding: 8px 8px 4px;
+    }
+    .nav-link {
+      display: block; padding: 6px 8px; border-radius: 6px;
+      color: var(--text2); text-decoration: none; font-size: 13px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover { background: var(--surface2); color: var(--text); }
+    .nav-link.active { background: rgba(124,111,247,0.15); color: var(--accent); }
+
+    main {
+      margin-left: 240px;
+      max-width: 820px;
+      padding: 48px 48px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, rgba(124,111,247,0.12), rgba(79,196,244,0.08));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 40px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(124,111,247,0.15) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(124,111,247,0.15); border: 1px solid rgba(124,111,247,0.3);
+      color: var(--accent); border-radius: 99px;
+      font-size: 11px; font-weight: 600; padding: 4px 12px;
+      margin-bottom: 16px;
+    }
+    .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { color: var(--text2); font-size: 16px; max-width: 560px; }
+    .hero-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+    .chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 5px 12px;
+      font-size: 12px; color: var(--text2);
+    }
+    .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+    /* Sections */
+    section { margin-bottom: 56px; scroll-margin-top: 24px; }
+    h2 {
+      font-size: 22px; font-weight: 700; margin-bottom: 20px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2 .section-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; background: var(--surface2);
+    }
+    h3 { font-size: 16px; font-weight: 600; margin: 24px 0 10px; color: var(--text); }
+    p { color: var(--text2); margin-bottom: 12px; }
+    ul, ol { color: var(--text2); padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 6px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 20px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+      margin-top: 2px;
+    }
+    .step-body h3 { margin-top: 0; margin-bottom: 6px; }
+    .step-body p { margin-bottom: 8px; }
+
+    /* Scope cards */
+    .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+    .scope-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 18px;
+      transition: border-color 0.15s;
+    }
+    .scope-card:hover { border-color: var(--accent); }
+    .scope-card .scope-name {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+    }
+    .scope-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+    }
+    .badge-default { background: rgba(61,214,140,0.15); color: var(--green); }
+    .badge-fast { background: rgba(79,196,244,0.15); color: var(--accent2); }
+    .badge-full { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .scope-card p { font-size: 13px; color: var(--text2); margin: 0; }
+    .scope-card .scope-when {
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text3);
+    }
+    .scope-card .scope-when strong { color: var(--text2); }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin: 12px 0;
+    }
+    .code-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 14px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; color: var(--text3); font-weight: 600;
+    }
+    .copy-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--text3); padding: 3px 10px; border-radius: 5px;
+      font-size: 11px; cursor: pointer; transition: all 0.15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    pre {
+      padding: 16px; overflow-x: auto;
+      font: 13px/1.6 'SF Mono', 'Fira Code', monospace;
+      color: var(--text);
+    }
+    code { font: 13px/1 'SF Mono', 'Fira Code', monospace; }
+    p code, li code {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 6px; color: var(--accent2);
+      font-size: 12px;
+    }
+
+    /* Callouts */
+    .callout {
+      border-radius: var(--radius); padding: 14px 16px;
+      margin: 16px 0; display: flex; gap: 12px;
+      font-size: 13px;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout p { margin: 0; }
+    .callout-tip { background: rgba(61,214,140,0.08); border: 1px solid rgba(61,214,140,0.2); color: var(--text2); }
+    .callout-warn { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: var(--text2); }
+    .callout-info { background: rgba(124,111,247,0.08); border: 1px solid rgba(124,111,247,0.2); color: var(--text2); }
+
+    /* Output tree */
+    .tree {
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      font: 13px/1.8 'SF Mono', 'Fira Code', monospace;
+      color: var(--text2);
+    }
+    .tree .dir { color: var(--accent2); }
+    .tree .file { color: var(--text); }
+    .tree .comment { color: var(--text3); }
+
+    /* Workflow diagram */
+    .flow {
+      display: flex; align-items: center; gap: 0;
+      margin: 20px 0; overflow-x: auto;
+    }
+    .flow-node {
+      flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px;
+      text-align: center; min-width: 130px;
+    }
+    .flow-node .flow-icon { font-size: 22px; margin-bottom: 6px; }
+    .flow-node .flow-label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .flow-node .flow-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+    .flow-arrow {
+      flex-shrink: 0;
+      font-size: 20px; color: var(--text3);
+      padding: 0 8px;
+    }
+
+    /* JSON example */
+    .json-key { color: #7c6ff7; }
+    .json-str { color: #3dd68c; }
+    .json-num { color: #4fc4f4; }
+    .json-comment { color: #5a6080; font-style: italic; }
+
+    /* Table */
+    table {
+      width: 100%; border-collapse: collapse; margin: 16px 0;
+      font-size: 13px;
+    }
+    th {
+      background: var(--surface2); padding: 10px 14px;
+      text-align: left; font-weight: 600; color: var(--text);
+      border-bottom: 1px solid var(--border); font-size: 12px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      color: var(--text2); vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* FAQ */
+    .faq { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .faq-q {
+      padding: 14px 18px; font-weight: 600; font-size: 14px;
+      cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center;
+    }
+    .faq-q:hover { background: var(--surface2); }
+    .faq-a {
+      padding: 0 18px 14px; color: var(--text2); font-size: 13px;
+      display: none;
+    }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-q { border-bottom: 1px solid var(--border); }
+    .chevron { transition: transform 0.2s; color: var(--text3); }
+    .faq-item.open .chevron { transform: rotate(180deg); }
+
+    @media (max-width: 800px) {
+      .sidebar { display: none; }
+      main { margin-left: 0; padding: 24px 20px 60px; }
+      .scope-grid { grid-template-columns: 1fr; }
+      .flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎨</div>
+    <h2>Design Export for AI Agents</h2>
+    <p>Figma Plugin Docs</p>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Getting Started</div>
+    <a href="#overview" class="nav-link">Overview</a>
+    <a href="#how-it-works" class="nav-link">How it works</a>
+    <a href="#setup" class="nav-link">Setup guide</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Using the Plugin</div>
+    <a href="#scope" class="nav-link">Scope options</a>
+    <a href="#assets" class="nav-link">Assets</a>
+    <a href="#export" class="nav-link">Running an export</a>
+    <a href="#claude" class="nav-link">Using with your AI agent</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Reference</div>
+    <a href="#output" class="nav-link">Output structure</a>
+    <a href="#data" class="nav-link">Data format</a>
+    <a href="#faq" class="nav-link">FAQ</a>
+  </div>
+</nav>
+
+<!-- Main -->
+<main>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">🎨 Figma Plugin</div>
+    <h1>Design Export<br/>for <span>AI Agents</span></h1>
+    <p>Export full design data — tokens, spacing, fonts, components, icons, and images — so any AI agent can implement any Figma screen pixel-perfect from just the URL.</p>
+    <div class="hero-chips">
+      <div class="chip"><span class="dot"></span> Free plan</div>
+      <div class="chip"><span class="dot"></span> No Dev Mode required</div>
+      <div class="chip"><span class="dot"></span> No API rate limits</div>
+      <div class="chip"><span class="dot"></span> Real icon &amp; image export</div>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <section id="overview">
+    <h2><span class="section-icon">💡</span> Overview</h2>
+    <p>When you ask an AI agent to implement a UI from Figma, it usually guesses at colors, invents icons, and misses exact spacing. This plugin fixes that gap by exporting <strong>everything the AI needs</strong> — not just a screenshot, but the actual structured design data.</p>
+
+    <div class="flow">
+      <div class="flow-node">
+        <div class="flow-icon">🖌️</div>
+        <div class="flow-label">Figma Plugin</div>
+        <div class="flow-sub">reads design data</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-icon">📦</div>
+        <div class="flow-label">ZIP Download</div>
+        <div class="flow-sub">one file, no server</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-icon">📁</div>
+        <div class="flow-label">figma-exports/</div>
+        <div class="flow-sub">JSON + assets</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-icon">🤖</div>
+        <div class="flow-label">AI Agent</div>
+        <div class="flow-sub">implements UI 1:1</div>
+      </div>
+    </div>
+
+    <h3>Why a plugin instead of the Figma REST API?</h3>
+    <table>
+      <tr>
+        <th>Approach</th>
+        <th>Rate limits</th>
+        <th>Design tokens</th>
+        <th>Asset export</th>
+        <th>Plan required</th>
+      </tr>
+      <tr>
+        <td>Figma REST API</td>
+        <td style="color:var(--red)">Yes</td>
+        <td style="color:var(--red)">Enterprise only</td>
+        <td style="color:var(--yellow)">Limited</td>
+        <td style="color:var(--red)">Enterprise</td>
+      </tr>
+      <tr>
+        <td>Dev Mode</td>
+        <td style="color:var(--green)">None</td>
+        <td style="color:var(--green)">Yes</td>
+        <td style="color:var(--green)">Yes</td>
+        <td style="color:var(--red)">Paid</td>
+      </tr>
+      <tr>
+        <td><strong>This plugin</strong></td>
+        <td style="color:var(--green)"><strong>None</strong></td>
+        <td style="color:var(--green)"><strong>Yes</strong></td>
+        <td style="color:var(--green)"><strong>Yes</strong></td>
+        <td style="color:var(--green)"><strong>Free</strong></td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works">
+    <h2><span class="section-icon">⚙️</span> How it works</h2>
+    <p>The Figma Plugin API runs <em>inside</em> Figma with full access to all design data — variables, styles, component properties, and asset exports. When you click <strong>Export &amp; Download</strong>, the plugin bundles everything into a ZIP file and downloads it directly to your machine. No server, no terminal, no extra software needed.</p>
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <p>The ZIP contains a folder named after your Figma file key. Extract it and move the folder to <code>~/figma-exports/</code> — that's the one manual step between clicking Export and using the data with your AI agent.</p>
+    </div>
+
+    <h3>What gets captured</h3>
+    <table>
+      <tr><th>Data</th><th>What the AI gets</th></tr>
+      <tr><td>Layout &amp; spacing</td><td>Exact <code>itemSpacing</code>, padding (t/r/b/l), auto-layout direction and alignment for every frame</td></tr>
+      <tr><td>Colors</td><td>Semantic token names (<code>color.primary</code>) resolved from variables + raw hex fallback</td></tr>
+      <tr><td>Typography</td><td>Font family, weight, size, line-height, letter-spacing, text case, decoration</td></tr>
+      <tr><td>Components</td><td>Every component defined once — views reference by id, never duplicated</td></tr>
+      <tr><td>Icons</td><td>Real SVG files exported via Figma's native export — no guessing</td></tr>
+      <tr><td>Images</td><td>Real PNG files at configured scales (@1x/@2x/@3x)</td></tr>
+      <tr><td>Shadows &amp; effects</td><td>Drop shadows, inner shadows, blurs with resolved colors</td></tr>
+    </table>
+  </section>
+
+  <!-- Setup -->
+  <section id="setup">
+    <h2><span class="section-icon">🚀</span> Setup guide</h2>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <p>You need the <strong>Figma desktop app</strong> to install local plugins. The browser version doesn't support "import from manifest". Download it free at figma.com/downloads.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Import into Figma desktop</h3>
+          <ol>
+            <li>Open the <strong>Figma desktop app</strong></li>
+            <li>Open any design file (plugins only appear inside files, not the home screen)</li>
+            <li>Press <code>⌘ /</code> to open Quick Actions</li>
+            <li>Type <strong>"Import plugin from manifest"</strong> and press Enter</li>
+            <li>Select this file: <code>~/Projects/figma-export/figma-plugin/manifest.json</code></li>
+          </ol>
+          <div class="callout callout-tip">
+            <div class="callout-icon">✅</div>
+            <p>Once imported, the plugin is available in all your Figma files. You only need to import it once. No build step required — the plugin is pre-built.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Create the exports folder</h3>
+          <p>This is where you'll move extracted exports. The default path is <code>~/figma-exports</code> — create it once:</p>
+          <div class="code-block">
+            <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+            <pre>mkdir -p ~/figma-exports</pre>
+          </div>
+          <div class="callout callout-info" style="margin-top:10px;">
+            <div class="callout-icon">📁</div>
+            <p><strong>Want a different folder?</strong> (e.g. a shared Dropbox or project folder) — run this instead, then skip the <code>mkdir</code> above:</p>
+            <div class="code-block" style="margin-top:8px;">
+              <div class="code-header"><span>Terminal — optional, one-time</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+              <pre># 1. Create your preferred folder
+mkdir -p ~/Dropbox/figma-exports
+
+# 2. Tell your AI agent to look there
+echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
+            </div>
+            <p style="margin-top:8px;">Your AI agent reads <code>~/.figma-export.json</code> automatically — no changes to CLAUDE.md needed. This file lives in your home directory and is never committed to git.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Add the CLAUDE.md rule</h3>
+          <p>This teaches your AI agent to read exported design data whenever you paste a Figma URL. Copy the content from the snippet file and add it to your global AI agent config (e.g. CLAUDE.md for Claude Code, .cursorrules for Cursor).</p>
+          <div class="code-block">
+            <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+            <pre>cat ~/Projects/figma-export/CLAUDE.md-snippet.md >> ~/.claude/CLAUDE.md</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scope -->
+  <section id="scope">
+    <h2><span class="section-icon">🎯</span> Scope options</h2>
+    <p>The <strong>Scope</strong> setting controls which frames the plugin exports. To understand the difference, imagine your Figma file is an email app with this structure:</p>
+
+    <!-- Figma file diagram -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin:20px 0;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:12px;">Your Figma file — "Email App"</div>
+      <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;">
+        <!-- Page 1 tab -->
+        <div style="flex-shrink:0;">
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <div style="background:var(--accent);color:#fff;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;">📄 Inbox</div>
+            <div style="background:var(--surface2);color:var(--text3);border-radius:5px;padding:4px 10px;font-size:11px;">📄 Compose</div>
+            <div style="background:var(--surface2);color:var(--text3);border-radius:5px;padding:4px 10px;font-size:11px;">📄 Settings</div>
+          </div>
+          <!-- Canvas of Inbox page -->
+          <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;gap:10px;flex-wrap:wrap;min-width:520px;">
+            <!-- Frame: Inbox List -->
+            <div class="canvas-frame" id="f-inbox" style="border:2px solid var(--border);border-radius:6px;width:100px;background:var(--surface2);cursor:pointer;" onclick="showScope('inbox')">
+              <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:5px 8px;font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;">📱 Inbox List</div>
+              <div style="padding:8px;display:flex;flex-direction:column;gap:4px;">
+                <div style="height:8px;background:var(--border);border-radius:2px;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:80%;"></div>
+                <div style="height:1px;background:var(--border);margin:2px 0;"></div>
+                <div style="height:8px;background:var(--border);border-radius:2px;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:70%;"></div>
+                <div style="height:1px;background:var(--border);margin:2px 0;"></div>
+                <div style="height:8px;background:var(--border);border-radius:2px;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:90%;"></div>
+              </div>
+            </div>
+            <!-- Frame: Email Detail -->
+            <div class="canvas-frame" id="f-detail" style="border:2px solid var(--border);border-radius:6px;width:100px;background:var(--surface2);cursor:pointer;" onclick="showScope('detail')">
+              <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:5px 8px;font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;">📱 Email Detail</div>
+              <div style="padding:8px;display:flex;flex-direction:column;gap:4px;">
+                <div style="height:10px;background:var(--border);border-radius:2px;width:60%;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:85%;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:70%;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;"></div>
+              </div>
+            </div>
+            <!-- Frame: Empty State -->
+            <div class="canvas-frame" id="f-empty" style="border:2px solid var(--border);border-radius:6px;width:100px;background:var(--surface2);cursor:pointer;" onclick="showScope('empty')">
+              <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:5px 8px;font-size:10px;font-weight:600;color:var(--text2);white-space:nowrap;">📱 Empty State</div>
+              <div style="padding:8px;display:flex;flex-direction:column;gap:4px;align-items:center;">
+                <div style="width:32px;height:32px;background:var(--border);border-radius:50%;margin:4px 0;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:80%;"></div>
+                <div style="height:6px;background:var(--border);border-radius:2px;width:60%;"></div>
+              </div>
+            </div>
+            <!-- Loose annotation (not a frame) -->
+            <div id="f-annotation" style="border:2px dashed var(--border);border-radius:6px;width:100px;padding:8px;background:transparent;cursor:pointer;opacity:0.6;" onclick="showScope('annotation')">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;margin-bottom:4px;">📝 Flow notes</div>
+              <div style="display:flex;flex-direction:column;gap:3px;">
+                <div style="height:5px;background:var(--border);border-radius:2px;"></div>
+                <div style="height:5px;background:var(--border);border-radius:2px;width:70%;"></div>
+                <div style="height:5px;background:var(--border);border-radius:2px;width:85%;"></div>
+              </div>
+              <div style="font-size:9px;color:var(--text3);margin-top:4px;">(not a frame)</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;">👆 Click a frame to see what each scope exports</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scope selector tabs -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button class="scope-tab active" onclick="setScope('top')" id="tab-top">All top-level frames</button>
+      <button class="scope-tab" onclick="setScope('selection')" id="tab-selection">Current selection</button>
+      <button class="scope-tab" onclick="setScope('page')" id="tab-page">Everything on this page</button>
+      <button class="scope-tab" onclick="setScope('file')" id="tab-file">All frames in the file</button>
+    </div>
+
+    <!-- Scope explanation panels -->
+    <div id="scope-top" class="scope-explain">
+      <div class="scope-explain-header">
+        <div class="scope-explain-name">All top-level frames (this page) <span class="scope-badge badge-default">Recommended</span></div>
+      </div>
+      <div class="scope-explain-body">
+        <div class="scope-visual">
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
+            <div class="sv-frames">
+              <div class="sv-frame exported">📱 Inbox List <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Email Detail <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Empty State <span class="sv-tick">✓</span></div>
+              <div class="sv-frame skipped">📝 Flow notes <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+          <div class="sv-page">
+            <div class="sv-page-label">📄 Compose</div>
+            <div class="sv-frames">
+              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+          <div class="sv-page">
+            <div class="sv-page-label">📄 Settings</div>
+            <div class="sv-frames">
+              <div class="sv-frame skipped">📱 Settings <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scope-detail">
+          <p>Exports every <strong>frame</strong> sitting directly on the <strong>current page's</strong> canvas. Loose groups, annotations, or sticky notes (non-frames) are skipped.</p>
+          <div class="scope-result">
+            <div class="sr-label">What gets exported:</div>
+            <div class="sr-item good">✓ Inbox List</div>
+            <div class="sr-item good">✓ Email Detail</div>
+            <div class="sr-item good">✓ Empty State</div>
+            <div class="sr-item skip">— Flow notes (not a frame — skipped)</div>
+            <div class="sr-item skip">— Compose page (different page — skipped)</div>
+            <div class="sr-item skip">— Settings page (different page — skipped)</div>
+          </div>
+          <div class="callout callout-tip" style="margin-top:12px;">
+            <div class="callout-icon">💡</div>
+            <p><strong>Use this when</strong> you're working on the Inbox page and want all its screens available to the AI. After one run, any URL from this page "just works".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="scope-selection" class="scope-explain" style="display:none;">
+      <div class="scope-explain-header">
+        <div class="scope-explain-name">Current selection <span class="scope-badge badge-fast">Fastest</span></div>
+      </div>
+      <div class="scope-explain-body">
+        <div class="scope-visual">
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
+            <div class="sv-frames">
+              <div class="sv-frame selected exported">📱 Email Detail <span style="font-size:10px;color:var(--accent);">[selected]</span> <span class="sv-tick">✓</span></div>
+              <div class="sv-frame skipped">📱 Inbox List <span class="sv-skip">—</span></div>
+              <div class="sv-frame skipped">📱 Empty State <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+          <div class="sv-page">
+            <div class="sv-page-label">📄 Compose</div>
+            <div class="sv-frames">
+              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scope-detail">
+          <p>Exports <strong>only the frame(s) you have selected</strong> right now in Figma. Tokens and components are still exported in full — only the view is limited to your selection.</p>
+          <div class="scope-result">
+            <div class="sr-label">Scenario: You clicked "Email Detail" in Figma</div>
+            <div class="sr-item good">✓ Email Detail (selected)</div>
+            <div class="sr-item skip">— Inbox List (not selected)</div>
+            <div class="sr-item skip">— Empty State (not selected)</div>
+          </div>
+          <div class="callout callout-tip" style="margin-top:12px;">
+            <div class="callout-icon">💡</div>
+            <p><strong>Use this when</strong> a designer updated the Email Detail screen and you only want to refresh that one view — not re-export all 10 screens on the page.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="scope-page" class="scope-explain" style="display:none;">
+      <div class="scope-explain-header">
+        <div class="scope-explain-name">Everything on this page</div>
+      </div>
+      <div class="scope-explain-body">
+        <div class="scope-visual">
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
+            <div class="sv-frames">
+              <div class="sv-frame exported">📱 Inbox List <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Email Detail <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Empty State <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported" style="border-style:dashed;">📝 Flow notes <span class="sv-tick">✓</span></div>
+            </div>
+          </div>
+          <div class="sv-page">
+            <div class="sv-page-label">📄 Compose</div>
+            <div class="sv-frames">
+              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scope-detail">
+          <p>Exports <strong>everything on the current page</strong> — frames AND loose groups, sections, and component canvases. Captures content that lives outside named frames.</p>
+          <div class="scope-result">
+            <div class="sr-label">What gets exported vs "All top-level frames":</div>
+            <div class="sr-item good">✓ Inbox List</div>
+            <div class="sr-item good">✓ Email Detail</div>
+            <div class="sr-item good">✓ Empty State</div>
+            <div class="sr-item good">✓ Flow notes <span style="color:var(--accent2);font-size:11px;">← this is the difference</span></div>
+            <div class="sr-item skip">— Other pages still skipped</div>
+          </div>
+          <div class="callout callout-tip" style="margin-top:12px;">
+            <div class="callout-icon">💡</div>
+            <p><strong>Use this when</strong> your page has user-flow diagrams, annotation groups, or component previews outside of frames that you also want the AI to understand.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="scope-file" class="scope-explain" style="display:none;">
+      <div class="scope-explain-header">
+        <div class="scope-explain-name">All frames in the file <span class="scope-badge badge-full">Most complete</span></div>
+      </div>
+      <div class="scope-explain-body">
+        <div class="scope-visual">
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Inbox</div>
+            <div class="sv-frames">
+              <div class="sv-frame exported">📱 Inbox List <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Email Detail <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Empty State <span class="sv-tick">✓</span></div>
+            </div>
+          </div>
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Compose</div>
+            <div class="sv-frames">
+              <div class="sv-frame exported">📱 Compose View <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Attachments <span class="sv-tick">✓</span></div>
+            </div>
+          </div>
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Settings</div>
+            <div class="sv-frames">
+              <div class="sv-frame exported">📱 Settings <span class="sv-tick">✓</span></div>
+              <div class="sv-frame exported">📱 Notifications <span class="sv-tick">✓</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scope-detail">
+          <p>Exports every frame across <strong>all pages</strong> in the entire Figma file in one go. Takes longer on large files, but once done every URL in the file works with your AI agent.</p>
+          <div class="scope-result">
+            <div class="sr-label">What gets exported (all 3 pages):</div>
+            <div class="sr-item good">✓ Inbox → Inbox List, Email Detail, Empty State</div>
+            <div class="sr-item good">✓ Compose → Compose View, Attachments</div>
+            <div class="sr-item good">✓ Settings → Settings, Notifications</div>
+          </div>
+          <div class="callout callout-tip" style="margin-top:12px;">
+            <div class="callout-icon">💡</div>
+            <p><strong>Use this when</strong> you're handing off a whole app and want every screen available without running the plugin per page. Run once at the start of a sprint.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .scope-tab {
+        background: var(--surface); border: 1px solid var(--border);
+        color: var(--text2); padding: 7px 14px; border-radius: 7px;
+        font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+      }
+      .scope-tab:hover { border-color: var(--accent); color: var(--text); }
+      .scope-tab.active { background: rgba(124,111,247,0.15); border-color: var(--accent); color: var(--accent); }
+      .scope-explain {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+      }
+      .scope-explain-header { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+      .scope-explain-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+      .scope-explain-body { display: flex; gap: 0; }
+      .scope-visual {
+        flex-shrink: 0; width: 220px; padding: 14px;
+        border-right: 1px solid var(--border);
+        background: var(--code-bg);
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .sv-page { opacity: 0.5; }
+      .sv-page.active-page { opacity: 1; }
+      .sv-page-label { font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 5px; }
+      .sv-frames { display: flex; flex-direction: column; gap: 4px; padding-left: 8px; }
+      .sv-frame {
+        font-size: 11px; padding: 5px 8px; border-radius: 5px;
+        border: 1px solid var(--border); background: var(--surface);
+        color: var(--text2); display: flex; justify-content: space-between;
+      }
+      .sv-frame.exported { border-color: rgba(61,214,140,0.4); background: rgba(61,214,140,0.06); color: var(--text); }
+      .sv-frame.skipped { opacity: 0.4; }
+      .sv-frame.selected { border-color: var(--accent); background: rgba(124,111,247,0.1); }
+      .sv-tick { color: var(--green); font-weight: 700; }
+      .sv-skip { color: var(--text3); }
+      .scope-detail { padding: 16px 18px; flex: 1; }
+      .scope-detail p { font-size: 13px; margin-bottom: 12px; }
+      .scope-result {
+        background: var(--code-bg); border: 1px solid var(--border);
+        border-radius: 8px; padding: 12px 14px;
+        display: flex; flex-direction: column; gap: 4px;
+      }
+      .sr-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+      .sr-item { font-size: 12px; font-family: 'SF Mono', monospace; }
+      .sr-item.good { color: var(--green); }
+      .sr-item.skip { color: var(--text3); }
+      .canvas-frame { transition: border-color 0.2s, box-shadow 0.2s; }
+      .canvas-frame:hover { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(124,111,247,0.2); }
+      @media (max-width: 700px) {
+        .scope-explain-body { flex-direction: column; }
+        .scope-visual { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      }
+    </style>
+
+    <script>
+      function setScope(name) {
+        ['top','selection','page','file'].forEach(s => {
+          document.getElementById('scope-' + s).style.display = s === name ? 'block' : 'none';
+          document.getElementById('tab-' + s).classList.toggle('active', s === name);
+        });
+      }
+      function showScope(frame) {
+        // hint which scope tab is relevant for the clicked frame
+        if (frame === 'annotation') setScope('page');
+        else if (frame === 'detail') setScope('selection');
+        else setScope('top');
+      }
+    </script>
+  </section>
+
+  <!-- Assets -->
+  <section id="assets">
+    <h2><span class="section-icon">🖼️</span> Assets — how the plugin detects icons vs images</h2>
+
+    <p>The plugin needs to decide for every node in your design: is this an <strong>icon/vector</strong>, a <strong>raster image</strong>, or just <strong>layout</strong> (a frame with children to walk)? It uses four signals in priority order.</p>
+
+    <div style="display:flex;gap:12px;margin:20px 0;">
+      <div class="scope-card" style="flex:1;border-color:rgba(124,111,247,0.4);">
+        <div class="scope-name">Export settings only <span class="scope-badge badge-default">Default</span></div>
+        <p>Exports <strong>only</strong> layers you marked in Figma's Export panel. Format and scale come from Figma — no extra config in the plugin.</p>
+        <div class="scope-when"><strong>Use when:</strong> Your designers mark their assets in Figma. Zero guessing, zero false positives.</div>
+      </div>
+      <div class="scope-card" style="flex:1;">
+        <div class="scope-name">Auto detect</div>
+        <p>Also exports by fill type, node type, and layer name — even if no export settings are set.</p>
+        <div class="scope-when"><strong>Use when:</strong> The file has no export settings and you want the plugin to figure it out automatically.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">⭐</div>
+      <p><strong>Recommended workflow:</strong> Use <em>Export settings only</em> and mark your assets in Figma's Export panel (right panel → Export → <strong>+</strong>). This gives you full control — format, scale, suffix — and the plugin respects it exactly. No naming conventions needed.</p>
+    </div>
+
+    <!-- Priority chain -->
+    <div style="display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+
+      <!-- Priority 1 -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);">
+        <div style="flex-shrink:0;width:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;">1</div>
+        <div style="padding:16px 18px;flex:1;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Designer set export settings in Figma <span class="scope-badge badge-default">Most reliable</span></div>
+          <p style="margin:0 0 8px;">In Figma's right panel → <strong>Export</strong> section → click <strong>+</strong> to add a format. The plugin reads this and exports using exactly those settings — format, scale, suffix — overriding everything else.</p>
+          <div class="code-block" style="margin:0;">
+            <div class="code-header"><span>What to do in Figma</span></div>
+            <pre>1. Select any layer (icon, image, component — anything)
+2. Right panel → scroll to "Export" section
+3. Click + → choose format (SVG / PNG / JPEG / PDF) and scale
+4. Done — plugin will always export this node correctly</pre>
+          </div>
+          <p style="margin:8px 0 0;font-size:12px;color:var(--text3);">Works for: ANY node type, ANY name. This is how the eye-slash icon, the chevron dropdown, and the checkmark circle should all be marked.</p>
+        </div>
+      </div>
+
+      <!-- Priority 2 -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);">
+        <div style="flex-shrink:0;width:52px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--text2);">2</div>
+        <div style="padding:16px 18px;flex:1;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Image fill <code style="font-size:12px;">fill.type === "IMAGE"</code></div>
+          <p style="margin:0 0 8px;">When a designer places a photo into a shape (File → Place Image, or drag-and-drop), Figma stores it as an IMAGE fill. The plugin detects this automatically — no naming or export settings needed.</p>
+          <p style="margin:0;font-size:12px;color:var(--text3);">Catches: hero images, product photos, screenshot backgrounds, illustration fills. Exported using the <strong>Images</strong> format settings in the plugin UI.</p>
+        </div>
+      </div>
+
+      <!-- Priority 3 -->
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);">
+        <div style="flex-shrink:0;width:52px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--text2);">3</div>
+        <div style="padding:16px 18px;flex:1;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Primitive vector node type</div>
+          <p style="margin:0 0 8px;">Some Figma node types are always vectors — no ambiguity, no settings needed:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+            <code>VECTOR</code><code>BOOLEAN_OPERATION</code><code>STAR</code><code>POLYGON</code>
+          </div>
+          <p style="margin:0;font-size:12px;color:var(--text3);">The <code>Vector</code> node (eye-slash icon in your password field) is detected this way automatically. Exported using the <strong>Icons &amp; Vectors</strong> format settings.</p>
+        </div>
+      </div>
+
+      <!-- Priority 4 -->
+      <div style="display:flex;gap:0;">
+        <div style="flex-shrink:0;width:52px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--text3);">4</div>
+        <div style="padding:16px 18px;flex:1;">
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text2);">Name heuristic — last resort <span class="scope-badge" style="background:rgba(248,113,113,0.1);color:var(--red);">Brittle</span></div>
+          <p style="margin:0 0 8px;color:var(--text2);">If none of the above match, the plugin checks the layer name for <code>/icon|logo|glyph/i</code> on INSTANCE or GROUP nodes.</p>
+          <div class="code-block" style="margin:0 0 8px;">
+            <div class="code-header"><span>Matches</span></div>
+            <pre style="color:var(--green);">✓ "sign up/login icons"   ← contains "icon"
+✓ "icon-search"
+✓ "logo-google"</pre>
+          </div>
+          <div class="code-block" style="margin:0;">
+            <div class="code-header"><span>Misses</span></div>
+            <pre style="color:var(--red);">✗ "chevron"               ← generic name, missed
+✗ "Frame 8889779"         ← no match
+✗ "eye-slash"             ← not in the pattern</pre>
+          </div>
+          <p style="margin:8px 0 0;font-size:12px;color:var(--text3);">Fix: use Priority 1 — add export settings in Figma's Export panel on these layers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- What about FRAMEs -->
+    <h3>What about FRAME nodes?</h3>
+    <p>Frames are <strong>never</strong> treated as asset leaves — even if they have export settings or contain only icons. A FRAME is layout: it has children (text, icons, other frames) that the AI needs to understand as structured data, not a flat graphic. The plugin always walks into frames and detects assets inside them.</p>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <p>In your screenshot: <code>Frame 8889779</code> is the container around the eye-slash icon. The plugin walks into it, finds the <code>Vector</code> child, and exports <em>that</em> as an SVG — not the whole frame.</p>
+    </div>
+
+    <h3>Export formats by asset type</h3>
+    <div class="scope-grid">
+      <div class="scope-card">
+        <div class="scope-name">Icons &amp; Vectors</div>
+        <p>Available: <strong>SVG</strong> (recommended), PNG (with scales), PDF.<br/>JPEG excluded — lossy compression degrades sharp vector edges.</p>
+        <div class="scope-when"><strong>Default:</strong> SVG only. Add PNG @2x/@3x if your project can't use inline SVG.</div>
+      </div>
+      <div class="scope-card">
+        <div class="scope-name">Images</div>
+        <p>Available: <strong>PNG</strong>, <strong>JPEG</strong> (with scales), PDF.<br/>SVG excluded — raster photos can't be converted to SVG.</p>
+        <div class="scope-when"><strong>Default:</strong> PNG @2x + @3x. Use JPEG for photos where file size matters.</div>
+      </div>
+    </div>
+
+    <h3>PNG and JPEG scales</h3>
+    <div class="scope-grid">
+      <div class="scope-card">
+        <div class="scope-name">@1x</div>
+        <p>1 pixel per point. Smallest file, standard resolution.</p>
+        <div class="scope-when"><strong>Use for:</strong> Prototypes, web non-retina, or when file size matters.</div>
+      </div>
+      <div class="scope-card">
+        <div class="scope-name">@2x <span class="scope-badge badge-default">Default</span></div>
+        <p>2 pixels per point. Retina / high-DPI. Standard for iOS and most web.</p>
+        <div class="scope-when"><strong>Use for:</strong> Most apps — covers standard and retina screens.</div>
+      </div>
+      <div class="scope-card">
+        <div class="scope-name">@3x <span class="scope-badge badge-default">Default</span></div>
+        <p>3 pixels per point. Super-retina. iPhone 12 Pro+, Pixel phones.</p>
+        <div class="scope-when"><strong>Use for:</strong> iOS apps targeting newer high-res devices.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Running an export -->
+  <section id="export">
+    <h2><span class="section-icon">▶️</span> Running an export</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open your design file in Figma desktop</h3>
+          <p>Navigate to the page that contains the screens you want to export.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Launch the plugin</h3>
+          <p>Press <code>⌘ /</code> in Figma → type <strong>"Design Export for AI Agents"</strong> → press Enter.</p>
+          <p>Alternatively: right-click the canvas → <strong>Plugins → Development → Design Export for AI Agents</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Choose your options and click Export &amp; Download</h3>
+          <ul>
+            <li>Pick your <strong>Scope</strong> (usually "All top-level frames")</li>
+            <li>Choose <strong>Export settings only</strong> (default) or <strong>Auto detect</strong> for assets</li>
+            <li>Click <strong>"Export &amp; Download"</strong></li>
+          </ul>
+          <p>A progress bar shows each step. When finished the browser downloads a <code>.zip</code> file named after your Figma file.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Extract and move the folder</h3>
+          <p>Double-click the downloaded <code>.zip</code> to extract it. You'll get a folder named with the file key (e.g. <code>ABC123/</code> for a cloud file, or a slug like <code>zalora-app/</code> for a local draft). Drag that folder into <code>~/figma-exports/</code>.</p>
+          <div class="callout callout-tip">
+            <div class="callout-icon">🔁</div>
+            <p><strong>Re-exporting the same file?</strong> Extract the new ZIP and drag the folder to <code>~/figma-exports/</code> — macOS will ask "Replace?". Click Replace. The old export is gone, the new one is in.</p>
+          </div>
+          <div class="callout callout-tip">
+            <div class="callout-icon">📂</div>
+            <p><strong>Multiple Figma files?</strong> Each file gets a different folder name, so they coexist in <code>~/figma-exports/</code> without conflict.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Using with your AI agent -->
+  <section id="claude">
+    <h2><span class="section-icon">🤖</span> Using with your AI agent</h2>
+
+    <p>Once exported, your AI agent can implement any screen from just its Figma URL. No extra steps needed — the agent rule handles the rest automatically.</p>
+
+    <h3>Basic usage</h3>
+    <div class="code-block">
+      <div class="code-header"><span>AI agent prompt</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+      <pre>Implement this screen as a SwiftUI view:
+https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
+    </div>
+
+    <p>The agent will:</p>
+    <ol>
+      <li>Parse <code>ABC123</code> (file key) and <code>456-789</code> (node id) from the URL</li>
+      <li>Read <code>~/figma-exports/ABC123/views/456-789.json</code> for the screen's tree</li>
+      <li>Read <code>~/figma-exports/ABC123/tokens.json</code> for colors, spacing, and typography</li>
+      <li>Look up referenced components in <code>components.json</code></li>
+      <li>Use real icons from <code>assets/*.svg</code> and images from <code>assets/*.png</code></li>
+      <li>Implement the UI in your project's framework, reusing existing components where they exist</li>
+    </ol>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">💡</div>
+      <p>The AI maps the framework-agnostic JSON to whatever framework your project uses — SwiftUI, React, Flutter, etc. It reads the project context automatically.</p>
+    </div>
+
+    <h3>Getting the node URL from Figma</h3>
+    <p>To get the URL for a specific frame:</p>
+    <ol>
+      <li>Click the frame in Figma</li>
+      <li>Right-click → <strong>Copy link to selection</strong></li>
+      <li>Paste directly into your AI agent — the URL will have <code>?node-id=456-789</code> at the end</li>
+    </ol>
+
+    <h3>If the files are missing</h3>
+    <p>If your AI agent can't find the export files, it means you haven't run the plugin for that file yet — or you ran it but forgot to move the extracted folder to <code>~/figma-exports/</code>. Re-export, extract the ZIP, and move the folder.</p>
+  </section>
+
+  <!-- Output structure -->
+  <section id="output">
+    <h2><span class="section-icon">📁</span> Output structure</h2>
+    <p>Exports land under <code>~/figma-exports/&lt;file_key&gt;/</code>, normalized so components and tokens are defined once and views reference them by id.</p>
+
+    <div class="tree">
+      <span class="dir">~/figma-exports/ABC123/</span><br/>
+      &nbsp;&nbsp;<span class="file">meta.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># file name, pages, view index (name → node-id)</span><br/>
+      &nbsp;&nbsp;<span class="file">tokens.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># resolved design tokens per mode (light/dark)</span><br/>
+      &nbsp;&nbsp;<span class="file">styles.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># color, text, and effect styles</span><br/>
+      &nbsp;&nbsp;<span class="file">components.json</span>  &nbsp;&nbsp;&nbsp;<span class="comment"># all components, defined ONCE</span><br/>
+      &nbsp;&nbsp;<span class="dir">views/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-789.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Log in" screen</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-812.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Sign up" screen</span><br/>
+      &nbsp;&nbsp;<span class="dir">assets/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">icon-google.svg</span>  &nbsp;<span class="comment"># icon exported as SVG</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@2x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 2x resolution</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@3x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 3x resolution</span>
+    </div>
+  </section>
+
+  <!-- Data format -->
+  <section id="data">
+    <h2><span class="section-icon">🔬</span> Data format</h2>
+    <p>All files are plain JSON. Here's what a typical view entry looks like — a frame from your "Log in" screen:</p>
+
+    <div class="code-block">
+      <div class="code-header"><span>views/456-789.json (excerpt)</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+      <pre>{
+  <span class="json-key">"name"</span>: <span class="json-str">"login form"</span>,
+  <span class="json-key">"type"</span>: <span class="json-str">"FRAME"</span>,
+  <span class="json-key">"layout"</span>: {
+    <span class="json-key">"mode"</span>: <span class="json-str">"VERTICAL"</span>,
+    <span class="json-key">"itemSpacing"</span>: <span class="json-num">16</span>,         <span class="json-comment">// exact gap between children</span>
+    <span class="json-key">"padding"</span>: { <span class="json-key">"t"</span>: <span class="json-num">24</span>, <span class="json-key">"r"</span>: <span class="json-num">20</span>, <span class="json-key">"b"</span>: <span class="json-num">24</span>, <span class="json-key">"l"</span>: <span class="json-num">20</span> }
+  },
+  <span class="json-key">"children"</span>: [
+    {
+      <span class="json-key">"name"</span>: <span class="json-str">"sign up/login icons"</span>,
+      <span class="json-key">"type"</span>: <span class="json-str">"INSTANCE"</span>,
+      <span class="json-key">"component"</span>: <span class="json-str">"Icons/Social"</span>,   <span class="json-comment">// defined once in components.json</span>
+      <span class="json-key">"asset"</span>: <span class="json-str">"assets/icon-google.svg"</span> <span class="json-comment">// real file</span>
+    },
+    {
+      <span class="json-key">"name"</span>: <span class="json-str">"Label text"</span>,
+      <span class="json-key">"type"</span>: <span class="json-str">"TEXT"</span>,
+      <span class="json-key">"text"</span>: <span class="json-str">"Mobile Number"</span>,
+      <span class="json-key">"font"</span>: {
+        <span class="json-key">"token"</span>: <span class="json-str">"text.body"</span>,         <span class="json-comment">// semantic style name</span>
+        <span class="json-key">"family"</span>: <span class="json-str">"Inter"</span>,
+        <span class="json-key">"size"</span>: <span class="json-num">14</span>, <span class="json-key">"weight"</span>: <span class="json-num">500</span>, <span class="json-key">"lineHeight"</span>: <span class="json-num">20</span>
+      },
+      <span class="json-key">"color"</span>: { <span class="json-key">"token"</span>: <span class="json-str">"color.text.secondary"</span>, <span class="json-key">"hex"</span>: <span class="json-str">"#6b7280"</span> }
+    }
+  ]
+}</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span>tokens.json (excerpt)</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
+      <pre>{
+  <span class="json-key">"colors"</span>: {
+    <span class="json-key">"color.primary"</span>: { <span class="json-key">"light"</span>: <span class="json-str">"#FF6B35"</span>, <span class="json-key">"dark"</span>: <span class="json-str">"#FF8F5E"</span> },
+    <span class="json-key">"color.text.secondary"</span>: { <span class="json-key">"light"</span>: <span class="json-str">"#6b7280"</span> }
+  },
+  <span class="json-key">"numbers"</span>: {
+    <span class="json-key">"spacing.md"</span>: { <span class="json-key">"light"</span>: <span class="json-num">16</span> },
+    <span class="json-key">"radius.card"</span>: { <span class="json-key">"light"</span>: <span class="json-num">12</span> }
+  },
+  <span class="json-key">"modes"</span>: [<span class="json-str">"light"</span>, <span class="json-str">"dark"</span>]
+}</pre>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <h2><span class="section-icon">❓</span> FAQ</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I need a paid Figma plan? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>No. The plugin uses the Figma Plugin API which is available on all plans, including the free plan. It does not use Dev Mode or the REST API.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I need to re-export when the design changes? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>Yes — re-run the plugin after design changes. Each export overwrites the previous one for that file key, so you always get fresh data. It only takes a few seconds for a single page.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What if my components are in a separate Figma library file? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>The plugin walks component instances transitively and exports the anatomy of each referenced component. Even if the master component lives in another file, the plugin resolves it via Figma's API and includes it in <code>components.json</code>. You don't need to export the library file separately.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          The plugin exported but my AI agent can't find the files — why? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>Two likely causes: (1) The file key in the URL doesn't match the export folder — check your exports directory to see what folders exist. (2) You're using a custom path via <code>~/.figma-export.json</code> but forgot to move the extracted folder there. Your AI agent reads <code>~/.figma-export.json</code> for the base path — make sure it matches where you actually put the folder.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What does "Mode 1" mean in tokens.json? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>In Figma, every variable collection has at least one <strong>mode</strong> — this is how Figma handles design token variants like light/dark theme or brand variations. "Mode 1" is Figma's default name when the collection was never renamed. It means your file has a single set of token values with no theming set up yet.</p>
+          <p>If the team renames the mode in Figma (right-click the collection → rename mode → "light") and adds a "dark" mode, the next export will show <code>"light"</code> and <code>"dark"</code> as mode keys instead of <code>"Mode 1"</code>. The plugin exports whatever modes exist in the file automatically.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          I work on multiple Figma files — do they overwrite each other? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>No. Each file gets its own folder named by its unique key (e.g. <code>~/figma-exports/ABC123/</code> and <code>~/figma-exports/DEF456/</code>). They coexist in <code>~/figma-exports/</code> without conflict. Re-exporting the same file replaces only that file's folder when you drag and choose "Replace".</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          My file is a local draft — the folder is named after the file title, not a key. <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>Local/unsaved Figma files don't have a real file key, so the plugin uses a slug of the file name instead (e.g. "Zalora App" → <code>zalora-app/</code>). Since local files also have no shareable URL, you'd tell the AI the design name directly — "use my figma export for the Zalora App design" — and it will find the matching folder by scanning <code>meta.json</code> files. Save the file to Figma cloud to get a real key and URL.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Which UI frameworks does this work with? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>All of them. The export is framework-agnostic JSON. Any AI agent reads it and maps to whatever framework your project uses — SwiftUI, React, Flutter, Vue, etc. — reusing your existing components and tokens where they already exist in the codebase.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function copy(btn) {
+    const code = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+  function toggleFaq(el) {
+    el.closest('.faq-item').classList.toggle('open');
+  }
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('section[id], .hero');
+  const links = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector('.nav-link[href="#' + e.target.id + '"]');
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
