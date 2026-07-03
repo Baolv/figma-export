@@ -215,18 +215,3 @@ A component in your file has broken variants. The plugin skips its properties an
 **Claude can't find the right folder after using a custom path**
 Check that `~/.figma-export.json` has the correct path and that you actually moved the export folder there. Run `cat ~/.figma-export.json` to verify.
 
----
-
-## For developers
-
-The plugin is pre-built — normal users don't need this section.
-
-If you modify the TypeScript source under `figma-plugin/src/`, recompile before testing:
-
-```bash
-cd figma-plugin
-npm install
-npm run build    # compiles src/code.ts → code.js
-```
-
-Figma picks up the updated `code.js` automatically on the next plugin run.
