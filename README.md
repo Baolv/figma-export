@@ -205,7 +205,7 @@ The `figma-lookup` skill detects and skips them automatically:
 Re-export with "Everything on this page" — this builds `node-index.json` which resolves any nested node.
 
 **Icons exporting as SVG instead of PDF**
-Use "Export settings only". FRAME nodes with PDF export settings now export correctly (fixed in v0.3.0).
+Use "Export settings only". FRAME nodes with PDF export settings now export correctly (fixed in v1.1.0).
 
 **"The export folder is missing"**
 Move the extracted ZIP folder to `~/figma-exports/`. The folder name is the Figma file key.
@@ -227,7 +227,7 @@ A component has broken variants — the plugin skips its properties and continue
 
 ## Changelog
 
-### v0.3.0
+### v1.1.0
 - **View screenshots** — every exported view includes a `views/<id>.png` PNG (capped 800px wide)
 - **Component screenshots** — every component has a `components/<id>.png` at full resolution
 - **Staleness detection** — `meta.json` now includes `exportedAt`; the skill warns when exports are > 14 days old
@@ -239,9 +239,9 @@ A component has broken variants — the plugin skips its properties and continue
 - **Code map moved** — now at `<exportsDir>/code-maps/<file_key>.json` (outside the per-file folder, so re-exports can't delete it) and keyed by stable component key (rename-proof)
 - **Removed `CLAUDE.md-snippet.md`** — the skill is the single integration path; paste SKILL.md into your agent's rules file if it doesn't support skills
 
-### v0.2.0
+### v0.2.0 (tag only, no GitHub release)
 - `node-index.json` — resolves any nested Figma URL without re-exporting
 - `figma-lookup` Claude Code skill
 
-### v0.1.0
+### v1.0.0
 - Initial release: tokens, layout trees, components, assets, ZIP export
