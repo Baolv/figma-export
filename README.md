@@ -121,7 +121,7 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789
 ```
 
 The agent will:
-1. Parse the file key and node id from the URL
+1. Parse the file key, file name, and node id from the URL, then resolve the export folder — by key if present, otherwise by matching the file name (Figma only exposes the real file key to private plugins, so export folders are usually named after the file, e.g. `nc-journey/`)
 2. Use `node-index.json` to resolve any nested node — not just top-level frames
 3. Read the view JSON for exact layout, spacing, tokens
 4. Read the view PNG for visual context (sizes always come from JSON, not the image)
@@ -196,10 +196,10 @@ Re-export with "Everything on this page" — this builds `node-index.json` which
 Use "Export settings only". FRAME nodes with PDF export settings now export correctly (fixed in v1.1.0).
 
 **"The export folder is missing"**
-Move the extracted ZIP folder to `~/figma-exports/`. The folder name is the Figma file key.
+Move the extracted ZIP folder to `~/figma-exports/`. The folder is usually named after the Figma file name (e.g. `nc-journey/`), not the key in the URL — Figma only exposes the real file key to private plugins. The skill resolves this automatically by matching the file name from the URL against each folder's `meta.json`.
 
-**Folder name is always the same (e.g. `zalora-app/`)**
-Your file is an unsaved local draft. Save to Figma cloud to get a unique file key.
+**Two Figma files with the same name**
+Since folders are named by file name, two files both called "App Design" would collide. Rename one of the files in Figma before exporting.
 
 **"Component set has existing errors"**
 A component has broken variants — the plugin skips its properties and continues. Fix in Figma to resolve.

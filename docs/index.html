@@ -404,7 +404,7 @@
     <p>The Figma Plugin API runs <em>inside</em> Figma with full access to all design data — variables, styles, component properties, and asset exports. When you click <strong>Export &amp; Download</strong>, the plugin bundles everything into a ZIP file and downloads it directly to your machine. No server, no terminal, no extra software needed.</p>
     <div class="callout callout-tip">
       <div class="callout-icon">💡</div>
-      <p>The ZIP contains a folder named after your Figma file key. Extract it and move the folder to <code>~/figma-exports/</code> — that's the one manual step between clicking Export and using the data with your AI agent.</p>
+      <p>The ZIP contains a folder named after your Figma file (e.g. <code>nc-journey/</code>). Extract it and move the folder to <code>~/figma-exports/</code> — that's the one manual step between clicking Export and using the data with your AI agent.</p>
     </div>
 
     <h3>What gets captured</h3>
@@ -931,7 +931,7 @@ cp -r ~/Projects/figma-export/skills/figma-lookup .claude/skills/</pre>
         <div class="step-num">4</div>
         <div class="step-body">
           <h3>Extract and move the folder</h3>
-          <p>Double-click the downloaded <code>.zip</code> to extract it. You'll get a folder named with the file key (e.g. <code>ABC123/</code> for a cloud file, or a slug like <code>zalora-app/</code> for a local draft). Drag that folder into <code>~/figma-exports/</code>.</p>
+          <p>Double-click the downloaded <code>.zip</code> to extract it. You'll get a folder named after your Figma file (e.g. <code>nc-journey/</code> — Figma only exposes the real file key to private plugins, so the name slug is used). Drag that folder into <code>~/figma-exports/</code>.</p>
           <div class="callout callout-tip">
             <div class="callout-icon">🔁</div>
             <p><strong>Re-exporting the same file?</strong> Extract the new ZIP and drag the folder to <code>~/figma-exports/</code> — macOS will ask "Replace?". Click Replace. The old export is gone, the new one is in.</p>
@@ -960,7 +960,7 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
 
     <p>The agent will:</p>
     <ol>
-      <li>Parse <code>ABC123</code> (file key) and <code>456-789</code> (node id) from the URL</li>
+      <li>Parse the file key, file name, and node id (<code>456-789</code>) from the URL, then resolve the export folder — by key if present, otherwise by matching the file name</li>
       <li>Read <code>~/figma-exports/ABC123/views/456-789.json</code> for the screen's tree</li>
       <li>Read <code>~/figma-exports/ABC123/tokens.json</code> for colors, spacing, and typography</li>
       <li>Look up referenced components in <code>components.json</code></li>
@@ -1100,7 +1100,7 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
           The plugin exported but my AI agent can't find the files — why? <span class="chevron">▾</span>
         </div>
         <div class="faq-a">
-          <p>Two likely causes: (1) The file key in the URL doesn't match the export folder — check your exports directory to see what folders exist. (2) You're using a custom path via <code>~/.figma-export.json</code> but forgot to move the extracted folder there. Your AI agent reads <code>~/.figma-export.json</code> for the base path — make sure it matches where you actually put the folder.</p>
+          <p>Two likely causes: (1) You're using a custom path via <code>~/.figma-export.json</code> but forgot to move the extracted folder there — the agent reads that file for the base path. (2) The export folder name doesn't match the file name in the URL (e.g. the file was renamed in Figma after exporting) — re-export, or check what folders exist in your exports directory. Note the URL's file key won't match the folder name — that's expected; the skill matches by file name.</p>
         </div>
       </div>
       <div class="faq-item">
