@@ -124,6 +124,14 @@ function getLayout(node: SceneNode): LayoutInfo | undefined {
       layout.primaryAxisAlign = n.primaryAxisAlignItems;
       layout.counterAxisAlign = n.counterAxisAlignItems;
       if (n.layoutWrap === "WRAP") layout.wrap = true;
+    } else if ((n.layoutMode as string) === "GRID") {
+      // Grid auto-layout (newer Figma API — guard each property)
+      const g = n as unknown as Record<string, unknown>;
+      if (typeof g.gridRowCount === "number") layout.gridRowCount = g.gridRowCount;
+      if (typeof g.gridColumnCount === "number") layout.gridColumnCount = g.gridColumnCount;
+      if (typeof g.gridRowGap === "number") layout.gridRowGap = g.gridRowGap;
+      if (typeof g.gridColumnGap === "number") layout.gridColumnGap = g.gridColumnGap;
+      layout.padding = paddingOf(n);
     }
   }
   // sizing of this node within its parent's auto-layout
@@ -240,14 +248,15 @@ async function exportAsset(
 
   // ── Mode: auto ────────────────────────────────────────────────────────────
   // Priority 1 — designer export settings (any node type, including frames).
+  // Always treated as a leaf for non-frames — never fall through to auto-detection
+  // even if the export fails, so the designer's explicit format choice is respected.
   if (hasDesignerExportSettings(node)) {
     const { primaryPath, assets } = await ctx.assets.exportFromSettings(node);
     if (primaryPath) {
       rec.asset = primaryPath;
       if (assets) rec.assets = assets;
-      // Frames still walk children — non-frames are leaves.
-      if (!isFrame) return true;
     }
+    if (!isFrame) return true;
   }
 
   // Priority 2 — raster image fill. Not a leaf — can have children (e.g. text

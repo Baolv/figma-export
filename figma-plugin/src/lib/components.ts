@@ -52,12 +52,28 @@ export class ComponentRegistry {
       : comp;
     const tree = await buildTree(anatomy);
 
+    // Preview render at natural size — view screenshots are downscaled, so
+    // small components (icons, buttons) need their own legible image.
+    let preview: string | undefined;
+    try {
+      const wide = "width" in anatomy && (anatomy as LayoutMixin).width > 800;
+      const bytes = await (anatomy as ExportMixin).exportAsync(
+        wide
+          ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } }
+          : { format: "PNG" },
+      );
+      preview = figma.base64Encode(bytes);
+    } catch {
+      /* preview is optional — ui reports the count of missing previews */
+    }
+
     const rec: ComponentRecord = {
       id: defId,
       key: (set ? set.key : comp.key) || defId,
       name: set ? set.name : comp.name,
       description: (set ? set.description : comp.description) || undefined,
       tree,
+      preview,
     };
     if (set) rec.variantProps = collectVariantProps(set);
 

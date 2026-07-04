@@ -262,20 +262,32 @@
         const prefix = fileKey + "/";
         const files = {};
 
-        // Normalize viewIndex node IDs (: -> -)
-        const meta = Object.assign({}, bundle.meta);
-        const normalizedIndex = {};
-        for (const [name, nodeId] of Object.entries(meta.viewIndex || {})) {
-          normalizedIndex[name] = String(nodeId).replace(/:/g, "-");
-        }
-        meta.viewIndex = normalizedIndex;
-        files[prefix + "meta.json"] = fflate.strToU8(JSON.stringify(meta, null, 2));
+        // viewIndex ids arrive already dash-normalized from serialize.ts
+        files[prefix + "meta.json"] = fflate.strToU8(JSON.stringify(bundle.meta, null, 2));
         files[prefix + "tokens.json"] = fflate.strToU8(JSON.stringify(bundle.tokens, null, 2));
         files[prefix + "styles.json"] = fflate.strToU8(JSON.stringify(bundle.styles, null, 2));
+        // Every view/component attempts a preview render, so a missing one = a failure.
+        let previewFails = 0;
+        for (const comp of Object.values(bundle.components || {})) {
+          if (comp.preview) {
+            const compId = String(comp.id).replace(/:/g, "-");
+            files[prefix + "components/" + compId + ".png"] = [base64ToBytes(comp.preview), { level: 0 }];
+            delete comp.preview;
+          } else {
+            previewFails++;
+          }
+        }
         files[prefix + "components.json"] = fflate.strToU8(JSON.stringify(bundle.components, null, 2));
 
         for (const view of (bundle.views || [])) {
           const nodeId = String(view.nodeId).replace(/:/g, "-");
+          if (view.preview) {
+            // PNG is already compressed — store without re-compressing
+            files[prefix + "views/" + nodeId + ".png"] = [base64ToBytes(view.preview), { level: 0 }];
+            delete view.preview;
+          } else {
+            previewFails++;
+          }
           files[prefix + "views/" + nodeId + ".json"] = fflate.strToU8(JSON.stringify(view, null, 2));
         }
 
@@ -320,12 +332,17 @@
           const assetCount = (bundle.assets || []).length;
           setStatus(
             "\u2713 Downloaded " + a.download + "\n\n" +
-            viewCount + " views \u00b7 " + compCount + " components \u00b7 " + assetCount + " assets\n\n" +
+            viewCount + " views \u00b7 " + compCount + " components \u00b7 " + assetCount + " assets" +
+            (previewFails > 0 ? " \u00b7 " + previewFails + " previews failed" : "") + "\n\n" +
             "Extract the ZIP and move the " + fileKey + "/ folder to ~/figma-exports/",
             "ok"
           );
           $("go").disabled = false;
-          post({ type: "done", message: "Design exported for Claude" });
+          post({
+            type: "done",
+            message: "Design exported for Claude" +
+              (previewFails > 0 ? " (" + previewFails + " previews failed)" : ""),
+          });
         });
       }
 

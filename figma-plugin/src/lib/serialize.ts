@@ -102,8 +102,23 @@ export async function buildBundle(
       20 + Math.round((60 * i) / targets.length),
     );
     const tree = await nodeToRecord(node, ctx);
-    views.push({ nodeId: node.id, page: pageNameOf(node), tree });
-    viewIndex[node.name] = node.id;
+    // Preview render so consumers get visual context alongside the data.
+    // Wide views are capped at 800px so huge sections don't bloat the ZIP.
+    let preview: string | undefined;
+    try {
+      const wide = "width" in node && (node as LayoutMixin).width > 800;
+      const bytes = await (node as ExportMixin).exportAsync(
+        wide
+          ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } }
+          : { format: "PNG" },
+      );
+      preview = figma.base64Encode(bytes);
+    } catch {
+      /* preview is optional — ui reports the count of missing previews */
+    }
+    views.push({ nodeId: node.id, page: pageNameOf(node), tree, preview });
+    // dash form to match filenames and node-index (Figma URLs use "-" too)
+    viewIndex[node.name] = node.id.replace(/:/g, "-");
   }
 
   progress("Packaging bundle…", 90);
@@ -115,6 +130,7 @@ export async function buildBundle(
         .replace(/^-+|-+$/g, "")
         .slice(0, 40) || "local",
       fileName: figma.root.name,
+      exportedAt: new Date().toISOString(),
       exportedFrom:
         options.scope === "file" ? "file" : figma.currentPage.name,
       scope: options.scope,

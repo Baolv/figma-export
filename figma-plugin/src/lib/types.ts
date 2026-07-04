@@ -74,6 +74,11 @@ export interface LayoutInfo {
   primaryAxisAlign?: string;
   counterAxisAlign?: string;
   wrap?: boolean;
+  // grid auto-layout (mode === "GRID")
+  gridRowCount?: number;
+  gridColumnCount?: number;
+  gridRowGap?: number;
+  gridColumnGap?: number;
   // sizing of THIS node within its parent's auto-layout
   sizingH?: string; // FIXED | HUG | FILL
   sizingV?: string;
@@ -113,6 +118,8 @@ export interface ViewRecord {
   nodeId: string;
   page: string;
   tree: NodeRecord;
+  // PNG render of the view (base64) — written to views/<node-id>.png in the ZIP
+  preview?: string;
 }
 
 export interface AssetRecord {
@@ -142,12 +149,15 @@ export interface ComponentRecord {
   description?: string;
   variantProps?: Record<string, string[]>; // prop -> possible values
   tree: NodeRecord; // the component's own anatomy
+  // PNG render of the anatomy (base64) — written to components/<id>.png in the ZIP
+  preview?: string;
 }
 
 export interface ExportBundle {
   meta: {
     fileKey: string;
     fileName: string;
+    exportedAt: string; // ISO timestamp — lets consumers detect stale exports
     exportedFrom: string; // page name or "file"
     scope: ExportScope;
     pages: string[];

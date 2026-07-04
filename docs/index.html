@@ -305,6 +305,7 @@
   <div class="nav-section">
     <div class="nav-section-title">Using the Plugin</div>
     <a href="#scope" class="nav-link">Scope options</a>
+    <a href="#device-chrome" class="nav-link">Device chrome</a>
     <a href="#assets" class="nav-link">Assets</a>
     <a href="#export" class="nav-link">Running an export</a>
     <a href="#claude" class="nav-link">Using with your AI agent</a>
@@ -323,6 +324,7 @@
   <!-- Hero -->
   <div class="hero">
     <div class="hero-badge">🎨 Figma Plugin</div>
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(61,214,140,0.12);border:1px solid rgba(61,214,140,0.25);color:var(--green);border-radius:99px;font-size:11px;font-weight:700;padding:3px 10px;margin-left:8px;vertical-align:middle;">v0.3.0</div>
     <h1>Design Export<br/>for <span>AI Agents</span></h1>
     <p>Export full design data — tokens, spacing, fonts, components, icons, and images — so any AI agent can implement any Figma screen pixel-perfect from just the URL.</p>
     <div class="hero-chips">
@@ -416,6 +418,8 @@
       <tr><td>Icons</td><td>Real SVG files exported via Figma's native export — no guessing</td></tr>
       <tr><td>Images</td><td>Real PNG files at configured scales (@1x/@2x/@3x)</td></tr>
       <tr><td>Shadows &amp; effects</td><td>Drop shadows, inner shadows, blurs with resolved colors</td></tr>
+      <tr><td>Screenshots</td><td>PNG render of every view (800px max) + full-res per-component PNG — visual context alongside structured data</td></tr>
+      <tr><td>Node index</td><td>Flat map of every node → view file — any copied Figma URL resolves, even deeply nested nodes</td></tr>
     </table>
   </section>
 
@@ -475,11 +479,16 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h3>Add the CLAUDE.md rule</h3>
-          <p>This teaches your AI agent to read exported design data whenever you paste a Figma URL. Copy the content from the snippet file and add it to your global AI agent config (e.g. CLAUDE.md for Claude Code, .cursorrules for Cursor).</p>
+          <h3>Install the <code>figma-lookup</code> skill</h3>
+          <p>Copy the skill into your project's <code>.claude/skills/</code> folder. Use it with <code>/figma-lookup &lt;url&gt;</code> or <code>/figma-lookup &lt;url&gt; implement</code>. The skill handles URL parsing, node lookup, staleness checking, device chrome detection, and smart asset matching.</p>
           <div class="code-block">
             <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copy(this)">Copy</button></div>
-            <pre>cat ~/Projects/figma-export/CLAUDE.md-snippet.md >> ~/.claude/CLAUDE.md</pre>
+            <pre>mkdir -p .claude/skills
+cp -r ~/Projects/figma-export/skills/figma-lookup .claude/skills/</pre>
+          </div>
+          <div class="callout callout-info" style="margin-top:10px;">
+            <div class="callout-icon">ℹ️</div>
+            <p>The SKILL.md format is supported by all major coding agents. To install globally instead of per-project, copy to <code>~/.claude/skills/</code>. If your agent doesn't support skills, paste the contents of <code>skills/figma-lookup/SKILL.md</code> into its rules file (e.g. <code>.cursorrules</code>).</p>
           </div>
         </div>
       </div>
@@ -556,100 +565,15 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
 
     <!-- Scope selector tabs -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="scope-tab active" onclick="setScope('top')" id="tab-top">All top-level frames</button>
+      <button class="scope-tab active" onclick="setScope('page')" id="tab-page">Everything on this page</button>
       <button class="scope-tab" onclick="setScope('selection')" id="tab-selection">Current selection</button>
-      <button class="scope-tab" onclick="setScope('page')" id="tab-page">Everything on this page</button>
-      <button class="scope-tab" onclick="setScope('file')" id="tab-file">All frames in the file</button>
+      <button class="scope-tab" onclick="setScope('file')" id="tab-file">Everything in this file</button>
     </div>
 
     <!-- Scope explanation panels -->
-    <div id="scope-top" class="scope-explain">
+    <div id="scope-page" class="scope-explain">
       <div class="scope-explain-header">
-        <div class="scope-explain-name">All top-level frames (this page) <span class="scope-badge badge-default">Recommended</span></div>
-      </div>
-      <div class="scope-explain-body">
-        <div class="scope-visual">
-          <div class="sv-page active-page">
-            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
-            <div class="sv-frames">
-              <div class="sv-frame exported">📱 Inbox List <span class="sv-tick">✓</span></div>
-              <div class="sv-frame exported">📱 Email Detail <span class="sv-tick">✓</span></div>
-              <div class="sv-frame exported">📱 Empty State <span class="sv-tick">✓</span></div>
-              <div class="sv-frame skipped">📝 Flow notes <span class="sv-skip">—</span></div>
-            </div>
-          </div>
-          <div class="sv-page">
-            <div class="sv-page-label">📄 Compose</div>
-            <div class="sv-frames">
-              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
-            </div>
-          </div>
-          <div class="sv-page">
-            <div class="sv-page-label">📄 Settings</div>
-            <div class="sv-frames">
-              <div class="sv-frame skipped">📱 Settings <span class="sv-skip">—</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="scope-detail">
-          <p>Exports every <strong>frame</strong> sitting directly on the <strong>current page's</strong> canvas. Loose groups, annotations, or sticky notes (non-frames) are skipped.</p>
-          <div class="scope-result">
-            <div class="sr-label">What gets exported:</div>
-            <div class="sr-item good">✓ Inbox List</div>
-            <div class="sr-item good">✓ Email Detail</div>
-            <div class="sr-item good">✓ Empty State</div>
-            <div class="sr-item skip">— Flow notes (not a frame — skipped)</div>
-            <div class="sr-item skip">— Compose page (different page — skipped)</div>
-            <div class="sr-item skip">— Settings page (different page — skipped)</div>
-          </div>
-          <div class="callout callout-tip" style="margin-top:12px;">
-            <div class="callout-icon">💡</div>
-            <p><strong>Use this when</strong> you're working on the Inbox page and want all its screens available to the AI. After one run, any URL from this page "just works".</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="scope-selection" class="scope-explain" style="display:none;">
-      <div class="scope-explain-header">
-        <div class="scope-explain-name">Current selection <span class="scope-badge badge-fast">Fastest</span></div>
-      </div>
-      <div class="scope-explain-body">
-        <div class="scope-visual">
-          <div class="sv-page active-page">
-            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
-            <div class="sv-frames">
-              <div class="sv-frame selected exported">📱 Email Detail <span style="font-size:10px;color:var(--accent);">[selected]</span> <span class="sv-tick">✓</span></div>
-              <div class="sv-frame skipped">📱 Inbox List <span class="sv-skip">—</span></div>
-              <div class="sv-frame skipped">📱 Empty State <span class="sv-skip">—</span></div>
-            </div>
-          </div>
-          <div class="sv-page">
-            <div class="sv-page-label">📄 Compose</div>
-            <div class="sv-frames">
-              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="scope-detail">
-          <p>Exports <strong>only the frame(s) you have selected</strong> right now in Figma. Tokens and components are still exported in full — only the view is limited to your selection.</p>
-          <div class="scope-result">
-            <div class="sr-label">Scenario: You clicked "Email Detail" in Figma</div>
-            <div class="sr-item good">✓ Email Detail (selected)</div>
-            <div class="sr-item skip">— Inbox List (not selected)</div>
-            <div class="sr-item skip">— Empty State (not selected)</div>
-          </div>
-          <div class="callout callout-tip" style="margin-top:12px;">
-            <div class="callout-icon">💡</div>
-            <p><strong>Use this when</strong> a designer updated the Email Detail screen and you only want to refresh that one view — not re-export all 10 screens on the page.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="scope-page" class="scope-explain" style="display:none;">
-      <div class="scope-explain-header">
-        <div class="scope-explain-name">Everything on this page</div>
+        <div class="scope-explain-name">Everything on this page <span class="scope-badge badge-default">DEFAULT</span></div>
       </div>
       <div class="scope-explain-body">
         <div class="scope-visual">
@@ -670,18 +594,55 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
           </div>
         </div>
         <div class="scope-detail">
-          <p>Exports <strong>everything on the current page</strong> — frames AND loose groups, sections, and component canvases. Captures content that lives outside named frames.</p>
+          <p>All frames on the current page, plus a full node-index so any nested Figma URL resolves.</p>
           <div class="scope-result">
-            <div class="sr-label">What gets exported vs "All top-level frames":</div>
+            <div class="sr-label">What gets exported:</div>
             <div class="sr-item good">✓ Inbox List</div>
             <div class="sr-item good">✓ Email Detail</div>
             <div class="sr-item good">✓ Empty State</div>
-            <div class="sr-item good">✓ Flow notes <span style="color:var(--accent2);font-size:11px;">← this is the difference</span></div>
+            <div class="sr-item good">✓ Flow notes</div>
             <div class="sr-item skip">— Other pages still skipped</div>
           </div>
           <div class="callout callout-tip" style="margin-top:12px;">
             <div class="callout-icon">💡</div>
-            <p><strong>Use this when</strong> your page has user-flow diagrams, annotation groups, or component previews outside of frames that you also want the AI to understand.</p>
+            <p><strong>Most common</strong> — run once, all screens available. After one run, any URL from this page "just works".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="scope-selection" class="scope-explain" style="display:none;">
+      <div class="scope-explain-header">
+        <div class="scope-explain-name">Current selection <span class="scope-badge badge-fast">FAST</span></div>
+      </div>
+      <div class="scope-explain-body">
+        <div class="scope-visual">
+          <div class="sv-page active-page">
+            <div class="sv-page-label">📄 Inbox <span style="color:var(--accent);font-size:10px;">(current page)</span></div>
+            <div class="sv-frames">
+              <div class="sv-frame selected exported">📱 Email Detail <span style="font-size:10px;color:var(--accent);">[selected]</span> <span class="sv-tick">✓</span></div>
+              <div class="sv-frame skipped">📱 Inbox List <span class="sv-skip">—</span></div>
+              <div class="sv-frame skipped">📱 Empty State <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+          <div class="sv-page">
+            <div class="sv-page-label">📄 Compose</div>
+            <div class="sv-frames">
+              <div class="sv-frame skipped">📱 Compose View <span class="sv-skip">—</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scope-detail">
+          <p>Only the frame(s) currently selected in Figma. Tokens and components are still exported in full — only the view is limited to your selection.</p>
+          <div class="scope-result">
+            <div class="sr-label">Scenario: You clicked "Email Detail" in Figma</div>
+            <div class="sr-item good">✓ Email Detail (selected)</div>
+            <div class="sr-item skip">— Inbox List (not selected)</div>
+            <div class="sr-item skip">— Empty State (not selected)</div>
+          </div>
+          <div class="callout callout-tip" style="margin-top:12px;">
+            <div class="callout-icon">💡</div>
+            <p><strong>Refreshing a single updated screen</strong> — a designer updated the Email Detail screen and you only want to re-export that one view.</p>
           </div>
         </div>
       </div>
@@ -689,7 +650,7 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
 
     <div id="scope-file" class="scope-explain" style="display:none;">
       <div class="scope-explain-header">
-        <div class="scope-explain-name">All frames in the file <span class="scope-badge badge-full">Most complete</span></div>
+        <div class="scope-explain-name">Everything in this file <span class="scope-badge badge-full">FULL</span></div>
       </div>
       <div class="scope-explain-body">
         <div class="scope-visual">
@@ -717,7 +678,7 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
           </div>
         </div>
         <div class="scope-detail">
-          <p>Exports every frame across <strong>all pages</strong> in the entire Figma file in one go. Takes longer on large files, but once done every URL in the file works with your AI agent.</p>
+          <p>Every frame across <strong>all pages</strong> in the entire Figma file in one go. Takes longer on large files, but once done every URL in the file works with your AI agent.</p>
           <div class="scope-result">
             <div class="sr-label">What gets exported (all 3 pages):</div>
             <div class="sr-item good">✓ Inbox → Inbox List, Email Detail, Empty State</div>
@@ -726,7 +687,7 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
           </div>
           <div class="callout callout-tip" style="margin-top:12px;">
             <div class="callout-icon">💡</div>
-            <p><strong>Use this when</strong> you're handing off a whole app and want every screen available without running the plugin per page. Run once at the start of a sprint.</p>
+            <p><strong>Full app handoff</strong> — run once at sprint start. Every screen in the file is available to the AI without running the plugin per page.</p>
           </div>
         </div>
       </div>
@@ -788,7 +749,7 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
 
     <script>
       function setScope(name) {
-        ['top','selection','page','file'].forEach(s => {
+        ['page','selection','file'].forEach(s => {
           document.getElementById('scope-' + s).style.display = s === name ? 'block' : 'none';
           document.getElementById('tab-' + s).classList.toggle('active', s === name);
         });
@@ -797,9 +758,34 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
         // hint which scope tab is relevant for the clicked frame
         if (frame === 'annotation') setScope('page');
         else if (frame === 'detail') setScope('selection');
-        else setScope('top');
+        else setScope('page');
       }
     </script>
+  </section>
+
+  <!-- Device Chrome -->
+  <section id="device-chrome">
+    <h2><span class="section-icon">📱</span> Device chrome</h2>
+    <p>Figma designs often include fake status bars, home indicators, and navigation bars as design chrome — they're part of the mockup frame but shouldn't end up in your implementation. These are typically named <strong>"status bar"</strong>, <strong>"Bars/Status/*"</strong>, <strong>"home indicator"</strong>, or similar.</p>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">⭐</div>
+      <p>The <code>figma-lookup</code> skill (Setup Step 3) <strong>auto-detects and skips device chrome</strong>, replacing it with the correct platform API automatically.</p>
+    </div>
+
+    <h3>Platform equivalents</h3>
+    <table>
+      <tr><th>Platform</th><th>Replace device chrome with</th></tr>
+      <tr><td>iOS / SwiftUI</td><td><code>UIStatusBarStyle</code> — configured in Info.plist or per-view modifier</td></tr>
+      <tr><td>Android</td><td><code>WindowCompat.setDecorFitsSystemWindows()</code> + edge-to-edge insets</td></tr>
+      <tr><td>React Native</td><td><code>&lt;StatusBar /&gt;</code> component from <code>react-native</code></td></tr>
+      <tr><td>Web</td><td>Omit entirely — browsers manage their own chrome</td></tr>
+    </table>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <p>If your agent doesn't support skills and you pasted SKILL.md into a rules file, the same device-chrome instructions apply — the agent should skip any node named 'status bar', 'Bars/Status/*', or 'home indicator'.</p>
+    </div>
   </section>
 
   <!-- Assets -->
@@ -960,7 +946,7 @@ echo '{"exportsDir":"~/Dropbox/figma-exports"}' > ~/.figma-export.json</pre>
         <div class="step-body">
           <h3>Choose your options and click Export &amp; Download</h3>
           <ul>
-            <li>Pick your <strong>Scope</strong> (usually "All top-level frames")</li>
+            <li>Pick your <strong>Scope</strong> (usually "Everything on this page")</li>
             <li>Choose <strong>Export settings only</strong> (default) or <strong>Auto detect</strong> for assets</li>
             <li>Click <strong>"Export &amp; Download"</strong></li>
           </ul>
@@ -1031,18 +1017,26 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
     <p>Exports land under <code>~/figma-exports/&lt;file_key&gt;/</code>, normalized so components and tokens are defined once and views reference them by id.</p>
 
     <div class="tree">
-      <span class="dir">~/figma-exports/ABC123/</span><br/>
-      &nbsp;&nbsp;<span class="file">meta.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># file name, pages, view index (name → node-id)</span><br/>
-      &nbsp;&nbsp;<span class="file">tokens.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># resolved design tokens per mode (light/dark)</span><br/>
-      &nbsp;&nbsp;<span class="file">styles.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># color, text, and effect styles</span><br/>
-      &nbsp;&nbsp;<span class="file">components.json</span>  &nbsp;&nbsp;&nbsp;<span class="comment"># all components, defined ONCE</span><br/>
-      &nbsp;&nbsp;<span class="dir">views/</span><br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-789.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Log in" screen</span><br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-812.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Sign up" screen</span><br/>
-      &nbsp;&nbsp;<span class="dir">assets/</span><br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">icon-google.svg</span>  &nbsp;<span class="comment"># icon exported as SVG</span><br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@2x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 2x resolution</span><br/>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@3x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 3x resolution</span>
+      <span class="dir">~/figma-exports/</span><br/>
+      &nbsp;&nbsp;<span class="dir" style="color:var(--green);">code-maps/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file" style="color:var(--green);">ABC123.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># NEW: Figma component → project file (created by skill; outside the folder so re-exports can't delete it)</span><br/>
+      &nbsp;&nbsp;<span class="dir">ABC123/</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># replaced wholesale on re-export</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">meta.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># file name, pages, view index — now includes exportedAt timestamp</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">tokens.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># resolved design tokens per mode (light/dark)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">styles.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># color, text, and effect styles</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">components.json</span>  &nbsp;&nbsp;&nbsp;<span class="comment"># all components, defined ONCE</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file" style="color:var(--green);">node-index.json</span>  &nbsp;<span class="comment"># NEW: any node-id → which view file contains it</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">views/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-789.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Log in" screen</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file" style="color:var(--green);">456-789.png</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># NEW: screenshot of the view (capped at 800px wide)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">456-812.json</span>  &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># "Sign up" screen</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file" style="color:var(--green);">456-812.png</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># NEW</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir" style="color:var(--green);">components/</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># NEW folder</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file" style="color:var(--green);">16102-7164.png</span>  &nbsp;<span class="comment"># NEW: full-res PNG per component (icons, buttons)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">assets/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">icon-google.svg</span>  &nbsp;<span class="comment"># icon exported as SVG</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@2x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 2x resolution</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">hero-bg@3x.png</span>  &nbsp;&nbsp;<span class="comment"># image at 3x resolution</span>
     </div>
   </section>
 
@@ -1166,6 +1160,22 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
         </div>
         <div class="faq-a">
           <p>All of them. The export is framework-agnostic JSON. Any AI agent reads it and maps to whatever framework your project uses — SwiftUI, React, Flutter, Vue, etc. — reusing your existing components and tokens where they already exist in the codebase.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Why is the wrong image showing as the hero? <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>The node may have an image fill that couldn't be exported separately. Reference the view PNG for visual context. The actual image content needs to come from the app's asset pipeline (CMS, CDN, etc.) — the exported PNG shows what the design intends, but the real asset should be sourced from your content system.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          The status bar from the Figma design is showing in my implementation. <span class="chevron">▾</span>
+        </div>
+        <div class="faq-a">
+          <p>That's design chrome, not app UI. Use the <code>figma-lookup</code> skill — it auto-detects and skips these nodes automatically. If using the basic CLAUDE.md rule, instruct your AI agent manually: skip any node named <code>"status bar"</code>, <code>"Bars/Status/*"</code>, or <code>"home indicator"</code>. See the <a href="#device-chrome">Device chrome</a> section for platform-specific replacements.</p>
         </div>
       </div>
     </div>

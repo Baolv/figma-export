@@ -227,12 +227,22 @@
       this.inProgress.add(defId);
       const anatomy = set ? (_a = set.defaultVariant) != null ? _a : set.children[0] : comp;
       const tree = await buildTree(anatomy);
+      let preview;
+      try {
+        const wide = "width" in anatomy && anatomy.width > 800;
+        const bytes = await anatomy.exportAsync(
+          wide ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } } : { format: "PNG" }
+        );
+        preview = figma.base64Encode(bytes);
+      } catch (e) {
+      }
       const rec = {
         id: defId,
         key: (set ? set.key : comp.key) || defId,
         name: set ? set.name : comp.name,
         description: (set ? set.description : comp.description) || void 0,
-        tree
+        tree,
+        preview
       };
       if (set) rec.variantProps = collectVariantProps(set);
       this.records.set(defId, rec);
@@ -482,6 +492,13 @@
         layout.primaryAxisAlign = n.primaryAxisAlignItems;
         layout.counterAxisAlign = n.counterAxisAlignItems;
         if (n.layoutWrap === "WRAP") layout.wrap = true;
+      } else if (n.layoutMode === "GRID") {
+        const g = n;
+        if (typeof g.gridRowCount === "number") layout.gridRowCount = g.gridRowCount;
+        if (typeof g.gridColumnCount === "number") layout.gridColumnCount = g.gridColumnCount;
+        if (typeof g.gridRowGap === "number") layout.gridRowGap = g.gridRowGap;
+        if (typeof g.gridColumnGap === "number") layout.gridColumnGap = g.gridColumnGap;
+        layout.padding = paddingOf(n);
       }
     }
     try {
@@ -569,8 +586,8 @@
       if (primaryPath) {
         rec.asset = primaryPath;
         if (assets) rec.assets = assets;
-        if (!isFrame) return true;
       }
+      if (!isFrame) return true;
     }
     if (hasImageFill(node)) {
       const o = ctx.options;
@@ -742,14 +759,24 @@
         20 + Math.round(60 * i / targets.length)
       );
       const tree = await nodeToRecord(node, ctx);
-      views.push({ nodeId: node.id, page: pageNameOf(node), tree });
-      viewIndex[node.name] = node.id;
+      let preview;
+      try {
+        const wide = "width" in node && node.width > 800;
+        const bytes = await node.exportAsync(
+          wide ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } } : { format: "PNG" }
+        );
+        preview = figma.base64Encode(bytes);
+      } catch (e) {
+      }
+      views.push({ nodeId: node.id, page: pageNameOf(node), tree, preview });
+      viewIndex[node.name] = node.id.replace(/:/g, "-");
     }
     progress("Packaging bundle\u2026", 90);
     const bundle = {
       meta: {
         fileKey: figma.fileKey || figma.root.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "local",
         fileName: figma.root.name,
+        exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
         exportedFrom: options.scope === "file" ? "file" : figma.currentPage.name,
         scope: options.scope,
         pages: figma.root.children.map((p) => p.name),
