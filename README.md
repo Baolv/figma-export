@@ -12,17 +12,20 @@ When you ask an AI to implement a UI from Figma, it usually guesses at colors, i
 
 ### vs the official Figma MCP
 
+The official Figma MCP fetches design data live from Figma's API on every request; this plugin pre-exports everything to local files once.
+
 | | Official Figma MCP | This plugin |
 |---|---|---|
-| **Tokens per screen** | ~20,000–50,000 (raw Figma JSON) | ~4,000–7,000 (pre-filtered) |
-| **API latency** | 5–15 sec per screen (live API round-trips) | ~0 (local file reads) |
-| **Offline** | No | Yes, after export |
-| **Component screenshots** | No | Yes — each component has its own full-res PNG |
+| **Design data** | Raw Figma API JSON — verbose, every node property | Pre-filtered, implementation-ready JSON |
+| **Access** | Live API round-trips per request | Local file reads, works offline |
+| **Component screenshots** | No | Yes — full-res PNG per component |
 | **Staleness detection** | No | Yes — warns if export > 14 days old |
 | **Code-map learning** | No — starts from scratch each session | Yes — grows across implementations, survives re-exports |
 | **Always fresh** | Yes | Requires re-export on design change |
 
-The token efficiency (5–8×) compounds further with the code map — once a Figma component is mapped to a project file, every future screen reuses that mapping instantly.
+> Token usage and implementation speed haven't been benchmarked against the official MCP on real projects yet — the filtered local format should be meaningfully smaller and faster, but treat that as expectation, not measurement.
+
+The code map compounds across screens — once a Figma component is mapped to a project file, every future screen reuses that mapping instantly.
 
 ### vs Figma REST API / Dev Mode
 
@@ -163,21 +166,6 @@ The agent will:
 **`components/<id>.png`** — full-resolution per-component screenshots. View PNGs can downscale 24px icons to illegibility; these are always crisp.
 
 **`code-maps/<file_key>.json`** — owned by the skill, not the plugin. It lives *next to* the export folder (not inside it) so replacing the folder on re-export never deletes it. Entries are keyed by Figma's stable component key, so renaming a component in Figma doesn't break its mapping.
-
----
-
-## Device chrome in designs
-
-Figma mobile designs include fake OS UI (status bar, home indicator, nav bar) so designers can see the full device context. These are **not app code**.
-
-The `figma-lookup` skill detects and skips them automatically:
-
-| Design node | Platform handling |
-|---|---|
-| `Bars/Status/*`, `status bar` | iOS: `UIStatusBarStyle`; Android: `WindowCompat` + `statusBarColor`; RN: `<StatusBar>`; Web: omit |
-| `home indicator` | `safeAreaInsets.bottom` on the root scroll view |
-| System `navigation bar` | Navigator (`NavigationView`, `Scaffold`, `AppBar`) |
-| System `tab bar` | Tab navigator (`TabView`, `BottomNavigationBar`) |
 
 ---
 

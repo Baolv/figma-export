@@ -305,7 +305,6 @@
   <div class="nav-section">
     <div class="nav-section-title">Using the Plugin</div>
     <a href="#scope" class="nav-link">Scope options</a>
-    <a href="#device-chrome" class="nav-link">Device chrome</a>
     <a href="#assets" class="nav-link">Assets</a>
     <a href="#export" class="nav-link">Running an export</a>
     <a href="#claude" class="nav-link">Using with your AI agent</a>
@@ -763,31 +762,6 @@ cp -r ~/Projects/figma-export/skills/figma-lookup .claude/skills/</pre>
     </script>
   </section>
 
-  <!-- Device Chrome -->
-  <section id="device-chrome">
-    <h2><span class="section-icon">📱</span> Device chrome</h2>
-    <p>Figma designs often include fake status bars, home indicators, and navigation bars as design chrome — they're part of the mockup frame but shouldn't end up in your implementation. These are typically named <strong>"status bar"</strong>, <strong>"Bars/Status/*"</strong>, <strong>"home indicator"</strong>, or similar.</p>
-
-    <div class="callout callout-tip">
-      <div class="callout-icon">⭐</div>
-      <p>The <code>figma-lookup</code> skill (Setup Step 3) <strong>auto-detects and skips device chrome</strong>, replacing it with the correct platform API automatically.</p>
-    </div>
-
-    <h3>Platform equivalents</h3>
-    <table>
-      <tr><th>Platform</th><th>Replace device chrome with</th></tr>
-      <tr><td>iOS / SwiftUI</td><td><code>UIStatusBarStyle</code> — configured in Info.plist or per-view modifier</td></tr>
-      <tr><td>Android</td><td><code>WindowCompat.setDecorFitsSystemWindows()</code> + edge-to-edge insets</td></tr>
-      <tr><td>React Native</td><td><code>&lt;StatusBar /&gt;</code> component from <code>react-native</code></td></tr>
-      <tr><td>Web</td><td>Omit entirely — browsers manage their own chrome</td></tr>
-    </table>
-
-    <div class="callout callout-warn">
-      <div class="callout-icon">⚠️</div>
-      <p>If your agent doesn't support skills and you pasted SKILL.md into a rules file, the same device-chrome instructions apply — the agent should skip any node named 'status bar', 'Bars/Status/*', or 'home indicator'.</p>
-    </div>
-  </section>
-
   <!-- Assets -->
   <section id="assets">
     <h2><span class="section-icon">🖼️</span> Assets — how the plugin detects icons vs images</h2>
@@ -1175,7 +1149,7 @@ https://www.figma.com/design/ABC123/MyApp?node-id=456-789</pre>
           The status bar from the Figma design is showing in my implementation. <span class="chevron">▾</span>
         </div>
         <div class="faq-a">
-          <p>That's design chrome, not app UI. Use the <code>figma-lookup</code> skill — it auto-detects and skips these nodes automatically. If using the basic CLAUDE.md rule, instruct your AI agent manually: skip any node named <code>"status bar"</code>, <code>"Bars/Status/*"</code>, or <code>"home indicator"</code>. See the <a href="#device-chrome">Device chrome</a> section for platform-specific replacements.</p>
+          <p>That's design chrome, not app UI — the OS renders the real one. The <code>figma-lookup</code> skill auto-detects and skips these nodes (<code>"status bar"</code>, <code>"Bars/Status/*"</code>, <code>"home indicator"</code>) and notes the platform API to configure instead.</p>
         </div>
       </div>
     </div>
