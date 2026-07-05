@@ -688,6 +688,20 @@
     "GROUP",
     "SECTION"
   ]);
+  function isScreenFrame(node) {
+    if (node.type !== "FRAME") return false;
+    const f = node;
+    if (f.children.length === 0) return false;
+    const w = f.width;
+    const h = f.height;
+    return w >= 200 && w <= 1440 && h >= 320 && h <= 3e3;
+  }
+  function collectScreenFrames(section, acc) {
+    for (const child of section.children) {
+      if (isScreenFrame(child)) acc.push(child);
+      else if (child.type === "SECTION") collectScreenFrames(child, acc);
+    }
+  }
   function targetsForScope(scope) {
     switch (scope) {
       case "selection":
@@ -751,23 +765,31 @@
         options.scope === "selection" ? "Nothing selected. Select a frame, or choose a different scope." : "No frames found for the chosen scope."
       );
     }
+    const seen = new Set(targets.map((t) => t.id));
+    const screens = [];
+    for (const t of targets) {
+      if (t.type === "SECTION") collectScreenFrames(t, screens);
+    }
+    const allTargets = [...targets, ...screens.filter((s) => !seen.has(s.id))];
     const views = [];
     const viewIndex = {};
-    for (let i = 0; i < targets.length; i++) {
-      const node = targets[i];
+    for (let i = 0; i < allTargets.length; i++) {
+      const node = allTargets[i];
       progress(
-        `Exporting "${node.name}" (${i + 1}/${targets.length})\u2026`,
-        20 + Math.round(60 * i / targets.length)
+        `Exporting "${node.name}" (${i + 1}/${allTargets.length})\u2026`,
+        20 + Math.round(60 * i / allTargets.length)
       );
       const tree = await nodeToRecord(node, ctx);
       let preview;
-      try {
-        const wide = "width" in node && node.width > 800;
-        const bytes = await node.exportAsync(
-          wide ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } } : { format: "PNG" }
-        );
-        preview = figma.base64Encode(bytes);
-      } catch (e) {
+      if (node.type !== "SECTION") {
+        try {
+          const wide = "width" in node && node.width > 800;
+          const bytes = await node.exportAsync(
+            wide ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } } : { format: "PNG" }
+          );
+          preview = figma.base64Encode(bytes);
+        } catch (e) {
+        }
       }
       views.push({ nodeId: node.id, page: pageNameOf(node), tree, preview });
       viewIndex[node.name] = node.id.replace(/:/g, "-");

@@ -16,6 +16,27 @@ const CONTAINER_TYPES = new Set([
   "SECTION",
 ]);
 
+// A FRAME that looks like a device artboard (a "screen"). Designers group many
+// of these inside a SECTION board; we promote each to its own view file so an
+// agent resolving a nested node loads just that screen, not the whole board.
+function isScreenFrame(node: SceneNode): boolean {
+  if (node.type !== "FRAME") return false;
+  const f = node as FrameNode;
+  if (f.children.length === 0) return false;
+  const w = f.width;
+  const h = f.height;
+  return w >= 200 && w <= 1440 && h >= 320 && h <= 3000;
+}
+
+// Collect screen frames nested inside a SECTION. Screens are the leaves of the
+// search — we don't look inside a screen for more screens, only into sub-sections.
+function collectScreenFrames(section: SectionNode, acc: SceneNode[]): void {
+  for (const child of section.children) {
+    if (isScreenFrame(child)) acc.push(child);
+    else if (child.type === "SECTION") collectScreenFrames(child, acc);
+  }
+}
+
 // Pick the nodes that become top-level "views" for the chosen scope.
 function targetsForScope(scope: ExportOptions["scope"]): SceneNode[] {
   switch (scope) {
@@ -93,28 +114,41 @@ export async function buildBundle(
     );
   }
 
+  // Promote screen frames nested inside SECTION boards to their own views.
+  // Order matters: boards first, screens last — buildNodeIndex is last-writer-
+  // wins, so a nested node ends up pointing at its specific screen, not the board.
+  const seen = new Set(targets.map((t) => t.id));
+  const screens: SceneNode[] = [];
+  for (const t of targets) {
+    if (t.type === "SECTION") collectScreenFrames(t as SectionNode, screens);
+  }
+  const allTargets = [...targets, ...screens.filter((s) => !seen.has(s.id))];
+
   const views: ViewRecord[] = [];
   const viewIndex: Record<string, string> = {};
-  for (let i = 0; i < targets.length; i++) {
-    const node = targets[i];
+  for (let i = 0; i < allTargets.length; i++) {
+    const node = allTargets[i];
     progress(
-      `Exporting "${node.name}" (${i + 1}/${targets.length})…`,
-      20 + Math.round((60 * i) / targets.length),
+      `Exporting "${node.name}" (${i + 1}/${allTargets.length})…`,
+      20 + Math.round((60 * i) / allTargets.length),
     );
     const tree = await nodeToRecord(node, ctx);
     // Preview render so consumers get visual context alongside the data.
-    // Wide views are capped at 800px so huge sections don't bloat the ZIP.
+    // Skip SECTION boards — an 800px thumbnail of a huge multi-screen canvas is
+    // unreadable; the promoted per-screen previews are the useful ones.
     let preview: string | undefined;
-    try {
-      const wide = "width" in node && (node as LayoutMixin).width > 800;
-      const bytes = await (node as ExportMixin).exportAsync(
-        wide
-          ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } }
-          : { format: "PNG" },
-      );
-      preview = figma.base64Encode(bytes);
-    } catch {
-      /* preview is optional — ui reports the count of missing previews */
+    if (node.type !== "SECTION") {
+      try {
+        const wide = "width" in node && (node as LayoutMixin).width > 800;
+        const bytes = await (node as ExportMixin).exportAsync(
+          wide
+            ? { format: "PNG", constraint: { type: "WIDTH", value: 800 } }
+            : { format: "PNG" },
+        );
+        preview = figma.base64Encode(bytes);
+      } catch {
+        /* preview is optional — ui reports the count of missing previews */
+      }
     }
     views.push({ nodeId: node.id, page: pageNameOf(node), tree, preview });
     // dash form to match filenames and node-index (Figma URLs use "-" too)

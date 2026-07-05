@@ -285,7 +285,8 @@
             // PNG is already compressed — store without re-compressing
             files[prefix + "views/" + nodeId + ".png"] = [base64ToBytes(view.preview), { level: 0 }];
             delete view.preview;
-          } else {
+          } else if (view.tree && view.tree.type !== "SECTION") {
+            // SECTION boards intentionally skip previews; anything else is a real failure
             previewFails++;
           }
           files[prefix + "views/" + nodeId + ".json"] = fflate.strToU8(JSON.stringify(view, null, 2));

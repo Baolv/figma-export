@@ -1,6 +1,6 @@
 {
   "name": "figma-design-export-plugin",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Figma plugin that exports full design data (tokens, layout, spacing, components) and real icon/image assets for Claude to implement UI 1:1.",
   "scripts": {
     "build": "esbuild src/code.ts --bundle --target=es2017 --outfile=code.js",
