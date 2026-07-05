@@ -50,7 +50,9 @@ export function colorRefFromSolid(
 ): ColorRef {
   return {
     token: tokenName,
-    hex: toHex(paint.color.r, paint.color.g, paint.color.b, paint.opacity ?? 1),
+    // 6-digit #RRGGBB only — alpha is carried by the separate `opacity` field,
+    // so consumers get a directly parseable hex (SwiftUI/CSS reject #RRGGBBAA).
+    hex: toHex(paint.color.r, paint.color.g, paint.color.b),
     opacity: paint.opacity,
   };
 }

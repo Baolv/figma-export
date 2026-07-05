@@ -273,10 +273,11 @@
     return isMixed(v) ? fallback : v;
   }
   function colorRefFromSolid(paint, tokenName) {
-    var _a;
     return {
       token: tokenName,
-      hex: toHex(paint.color.r, paint.color.g, paint.color.b, (_a = paint.opacity) != null ? _a : 1),
+      // 6-digit #RRGGBB only — alpha is carried by the separate `opacity` field,
+      // so consumers get a directly parseable hex (SwiftUI/CSS reject #RRGGBBAA).
+      hex: toHex(paint.color.r, paint.color.g, paint.color.b),
       opacity: paint.opacity
     };
   }

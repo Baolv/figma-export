@@ -215,6 +215,9 @@ A component has broken variants — the plugin skips its properties and continue
 
 ## Changelog
 
+### v1.1.1
+- **Color fix** — `hex` in node fills, strokes, and effect colors was emitting 8-digit `#RRGGBBAA` (e.g. `#ffffff03`) that SwiftUI/CSS can't parse, while also duplicating the alpha in the `opacity` field. `hex` is now always 6-digit `#RRGGBB`; use the `opacity` field for alpha. (Token colors keep 8-digit hex since they have no separate opacity field.)
+
 ### v1.1.0
 - **View screenshots** — every exported view includes a `views/<id>.png` PNG (capped 800px wide)
 - **Component screenshots** — every component has a `components/<id>.png` at full resolution
