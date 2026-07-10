@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design Export for AI Agents — Team Intro</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f8fa;
+    --surface2: #eef0f4;
+    --border: #e2e5ea;
+    --accent: #6b5ce7;
+    --accent2: #0284c7;
+    --green: #16a34a;
+    --yellow: #b45309;
+    --text: #1a1d27;
+    --text2: #52586b;
+    --text3: #8a90a2;
+    --code-bg: #f6f7f9;
+    font: 16px/1.6 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+
+  .deck { height: 100vh; width: 100vw; position: relative; }
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 9vw;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  h1 { font-size: 3.4rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
+  h1 .grad { color: var(--accent); }
+  h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 1.6rem; letter-spacing: -0.01em; }
+  h2 .em { color: var(--accent); }
+  p.lead { font-size: 1.5rem; color: var(--text2); max-width: 46ch; margin-top: 1.2rem; }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+  li { font-size: 1.4rem; display: flex; gap: 0.8rem; align-items: flex-start; }
+  li .mk { color: var(--accent); font-weight: 800; flex-shrink: 0; }
+  li small { display: block; color: var(--text3); font-size: 1rem; font-weight: 400; margin-top: 2px; }
+  code { font-family: 'SF Mono','Fira Code',monospace; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; font-size: 0.85em; color: var(--accent2); }
+
+  .badge { display:inline-flex; align-items:center; gap:6px; background: color-mix(in srgb, var(--accent) 12%, white); border:1px solid color-mix(in srgb, var(--accent) 30%, white); color: var(--accent); border-radius:99px; font-size:0.9rem; font-weight:700; padding:5px 14px; margin-bottom:1.4rem; width:fit-content; }
+  .chips { display:flex; gap:10px; flex-wrap:wrap; margin-top:2rem; }
+  .chip { background: var(--surface); border:1px solid var(--border); border-radius:99px; padding:8px 16px; font-size:1rem; color:var(--text2); }
+  .chip b { color: var(--text); }
+
+  /* two-column */
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap: 2.5rem; }
+  .card { background: var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.6rem 1.8rem; }
+  .card h3 { font-size:1.2rem; margin-bottom:0.8rem; }
+  .card.bad h3 { color: var(--text2); }
+  .card.good h3 { color: var(--green); }
+  .card ul { gap:0.6rem; }
+  .card li { font-size:1.05rem; }
+
+  /* flow */
+  .flow { display:flex; align-items:center; gap:0; flex-wrap:wrap; margin-top:2rem; }
+  .node { background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem 1.4rem; text-align:center; min-width:150px; }
+  .node .i { font-size:1.8rem; }
+  .node .t { font-weight:700; font-size:1.05rem; margin-top:4px; }
+  .node .s { font-size:0.85rem; color:var(--text3); }
+  .arrow { color: var(--text3); font-size:1.6rem; padding:0 10px; }
+
+  .steps { display:flex; flex-direction:column; gap:1.4rem; }
+  .step { display:flex; gap:1.2rem; align-items:flex-start; }
+  .step .n { flex-shrink:0; width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .step .b { font-size:1.25rem; }
+  .step .b code { font-size:0.95rem; }
+  .step .b small { display:block; color:var(--text3); font-size:0.95rem; }
+
+  pre { background: var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.4rem; font-family:'SF Mono','Fira Code',monospace; font-size:1.05rem; color:var(--text); margin-top:1.4rem; overflow:auto; }
+  .muted { color: var(--text3); }
+
+  /* footer / nav */
+  .bar { position:fixed; bottom:0; left:0; right:0; height:6px; background: var(--surface2); z-index:5; }
+  .bar > i { display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0; transition:width 0.25s ease; }
+  .count { position:fixed; bottom:16px; right:20px; font-size:0.85rem; color:var(--text3); z-index:5; }
+  .hint { position:fixed; bottom:16px; left:20px; font-size:0.8rem; color:var(--text3); z-index:5; }
+  .title-foot { margin-top:2.5rem; color:var(--text3); font-size:1rem; }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1. Title -->
+  <section class="slide active" style="align-items:flex-start;">
+    <div class="badge">🎨 Internal tooling · Free · No Dev Mode</div>
+    <h1>Design Export<br/>for <span class="grad">AI Agents</span></h1>
+    <p class="lead">Turn any Figma URL into a pixel-perfect implementation — the AI reads real design data and assets, not a screenshot.</p>
+    <div class="title-foot">A Figma plugin + Claude skill · github.com/Baolv/figma-export</div>
+  </section>
+
+  <!-- 2. The problem -->
+  <section class="slide">
+    <h2>Today you pick one of two imperfect options</h2>
+    <ul>
+      <li><span class="mk">✗</span><div>Give the AI a <b>screenshot / image</b> → it <b>guesses</b><small>invents colors, placeholder icons, spacing "close enough" — no real tokens or assets. You hand-correct every value.</small></div></li>
+      <li><span class="mk">~</span><div>Use the <b>official Figma MCP</b> → accurate, <b>but rate-limited</b><small>real data (not guessing) — but only 6 calls/month on the free plan (~2–3 screens), then you're blocked.</small></div></li>
+    </ul>
+    <p class="lead" style="font-size:1.2rem;margin-top:1.8rem;">We want that same accuracy — <b>free, and across the whole file</b>.</p>
+  </section>
+
+  <!-- 3. What it is -->
+  <section class="slide">
+    <h2>What it is</h2>
+    <p class="lead" style="max-width:52ch;">A Figma plugin that exports the <b>full structured design</b> — tokens, layout, spacing, components, real icons/images, and per-screen screenshots — as a ZIP. A Claude skill reads it and implements the screen in <b>your</b> codebase.</p>
+    <div class="chips">
+      <div class="chip"><b>Exact</b> spacing &amp; tokens</div>
+      <div class="chip"><b>Real</b> SVG / PNG / PDF assets</div>
+      <div class="chip"><b>Per-screen</b> JSON + screenshot</div>
+      <div class="chip">Any framework: <b>SwiftUI · Android · React · Flutter</b></div>
+    </div>
+  </section>
+
+  <!-- 4. How it works -->
+  <section class="slide">
+    <h2>How it works</h2>
+    <div class="flow">
+      <div class="node"><div class="i">🖌️</div><div class="t">Figma plugin</div><div class="s">reads the design</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="i">📦</div><div class="t">ZIP download</div><div class="s">one file, no server</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="i">📁</div><div class="t">~/figma-exports/</div><div class="s">JSON + assets + PNGs</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="i">🤖</div><div class="t">AI agent</div><div class="s">implements 1:1</div></div>
+    </div>
+    <p class="lead" style="margin-top:2.5rem;font-size:1.2rem;">No server, no terminal, no build step. Export runs inside Figma; the AI reads local files.</p>
+  </section>
+
+  <!-- 5. The real differentiator: same quality, free, no rate limit -->
+  <section class="slide">
+    <div class="badge">💸 The real difference</div>
+    <h2>Same result — <span class="em">free, no rate limit.</span></h2>
+    <div class="cols">
+      <div class="card bad">
+        <h3>Official Figma MCP</h3>
+        <ul>
+          <li><span class="mk">·</span><div>Free (Starter) plan: <b>6 calls / month</b><small>one screen = several calls → ~2–3 screens, then blocked till next month</small></div></li>
+          <li><span class="mk">·</span><div>More needs a <b>paid Dev/Full seat</b><small>Professional 200/day · Organization 600/day</small></div></li>
+        </ul>
+      </div>
+      <div class="card good">
+        <h3>This plugin</h3>
+        <ul>
+          <li><span class="mk">✓</span><div><b>No rate limit</b>, works on any plan incl. free<small>uses the Figma Plugin API, not the metered MCP</small></div></li>
+          <li><span class="mk">✓</span><div>One export = the <b>whole file</b>, unlimited screens</div></li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead" style="font-size:1.25rem;margin-top:1.6rem;">Same design data, same quality output — the only difference is <b>cost &amp; limits</b>.</p>
+    <p class="muted" style="margin-top:0.8rem;font-size:0.9rem;">Source: developers.figma.com/docs/figma-mcp-server/rate-limits-access · limits current as of these docs — verify before quoting.</p>
+  </section>
+
+  <!-- 6. Setup -->
+  <section class="slide">
+    <h2>Setup — once, ~2 minutes</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="b">Import the plugin<small>Figma desktop → <code>⌘/</code> → "Import plugin from manifest" → pick <code>figma-plugin/manifest.json</code></small></div></div>
+      <div class="step"><div class="n">2</div><div class="b">Make the exports folder<small><code>mkdir -p ~/figma-exports</code></small></div></div>
+      <div class="step"><div class="n">3</div><div class="b">Install the skill<small><code>cp -r skills/figma-lookup .claude/skills/</code> (or into <code>~/.claude/skills/</code> globally)</small></div></div>
+    </div>
+  </section>
+
+  <!-- 7. Daily workflow -->
+  <section class="slide">
+    <h2>Daily workflow</h2>
+    <ul>
+      <li><span class="mk">1</span><div>Export the page once from Figma (the plugin), drag the folder to <code>~/figma-exports/</code>.</div></li>
+      <li><span class="mk">2</span><div>Copy a frame's link in Figma → <b>Copy link to selection</b>.</div></li>
+      <li><span class="mk">3</span><div>In Claude Code: <code>/figma-lookup &lt;url&gt; implement with swiftui</code></div></li>
+    </ul>
+    <pre>/figma-lookup https://figma.com/design/…?node-id=16581-89544 implement with swiftui</pre>
+  </section>
+
+  <!-- 8. What the agent gets -->
+  <section class="slide">
+    <h2>What the agent actually reads</h2>
+    <div class="cols">
+      <div class="card">
+        <ul>
+          <li><span class="mk">·</span> Exact layout, padding, item spacing</li>
+          <li><span class="mk">·</span> Design tokens (color / type / spacing)</li>
+          <li><span class="mk">·</span> Components + variants, defined once</li>
+        </ul>
+      </div>
+      <div class="card">
+        <ul>
+          <li><span class="mk">·</span> Real icons/images; matched to existing project assets</li>
+          <li><span class="mk">·</span> Per-screen screenshot for visual context</li>
+          <li><span class="mk">·</span> Node index → any link resolves, even nested</li>
+        </ul>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1.4rem;font-size:1rem;">Sizes always come from the JSON — the screenshot is visual reference only.</p>
+  </section>
+
+  <!-- 9. Demo -->
+  <section class="slide" style="align-items:flex-start;">
+    <div class="badge">▶ Live demo</div>
+    <h2>Let's build a real screen</h2>
+    <p class="lead" style="max-width:50ch;">Paste an Account / Sign-up screen link → watch it resolve the node, read tokens, reuse existing icons, and write the view in our design system.</p>
+    <p class="muted" style="margin-top:1.5rem;">Fallback if offline: open <code>docs/index.html</code> for the walkthrough &amp; output structure.</p>
+  </section>
+
+  <!-- 10. Good to know -->
+  <section class="slide">
+    <h2>Good to know</h2>
+    <ul>
+      <li><span class="mk">•</span><div>Re-export when the design changes.<small>The skill warns if an export is &gt; 14 days old.</small></div></li>
+      <li><span class="mk">•</span><div>Folder is named by the Figma file name (e.g. <code>nc-journey/</code>), not the URL key.<small>Figma only gives the real key to private plugins — the skill matches by name automatically.</small></div></li>
+      <li><span class="mk">•</span><div>The code-map grows as you go.<small>Once a component maps to a project file, every future screen reuses it.</small></div></li>
+    </ul>
+  </section>
+
+  <!-- 11. Get started -->
+  <section class="slide" style="align-items:flex-start;">
+    <h1>Try it this week 🚀</h1>
+    <p class="lead">Repo + setup guide + releases:</p>
+    <ul style="margin-top:1.2rem;">
+      <li><span class="mk">→</span> <code>github.com/Baolv/figma-export</code></li>
+      <li><span class="mk">→</span> Full docs: open <code>docs/index.html</code></li>
+      <li><span class="mk">→</span> Questions / issues: ping me on Slack</li>
+    </ul>
+    <p class="title-foot">Pick one screen you're building this sprint and try it end-to-end.</p>
+  </section>
+
+</div>
+
+<div class="bar"><i id="prog"></i></div>
+<div class="count" id="count"></div>
+<div class="hint">← → or Space to navigate · F for fullscreen</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    document.getElementById('prog').style.width = ((i) / (slides.length - 1) * 100) + '%';
+    document.getElementById('count').textContent = (i + 1) + ' / ' + slides.length;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { show(i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { show(i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  document.addEventListener('click', (e) => { if (e.clientX > window.innerWidth * 0.5) show(i + 1); else show(i - 1); });
+  show(0);
+</script>
+</body>
+</html>
