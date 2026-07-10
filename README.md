@@ -58,17 +58,31 @@ No server. No terminal. No build step. The plugin is pre-built — just import a
 
 ---
 
+## Access requirements
+
+**You need Editor access to install this plugin.** If you're a Viewer:
+1. **Duplicate the design file** → right-click the file in Figma → "Duplicate"
+2. Open the duplicated file and install the plugin
+
+This works because duplicating gives you edit access to the copy (no cost, no account upgrade).
+
+---
+
 ## Setup — 3 steps
 
 ### Step 1 — Import the plugin into Figma desktop
 
 > You need the **Figma desktop app**. The browser version doesn't support local plugins.
-> Download free at figma.com/downloads.
+> Download free at [figma.com/downloads](https://www.figma.com/downloads).
 
-1. Open the Figma desktop app
-2. Open any design file
-3. Press `⌘ /` → type **"Import plugin from manifest"** → press Enter
-4. Select: `figma-plugin/manifest.json` from this repo
+1. Open the **Figma desktop app** and open any design file
+
+2. Import the plugin from the manifest:
+   - Go to **Main menu → Plugins → Development → Import plugin from manifest...**
+
+3. Select: `figma-plugin/manifest.json` from this repo (after downloading or cloning it)
+
+4. Done — **"Design Export for AI Agents"** will now appear in your plugins list
 
 ### Step 2 — Create your exports folder
 
