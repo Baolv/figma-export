@@ -653,6 +653,7 @@
       if (Object.keys(props).length) rec.props = props;
       const overrides = textOverridesOf(inst);
       if (Object.keys(overrides).length) rec.overrides = overrides;
+      await applyVisualProps(rec, node, ctx);
       rec.layout = getLayout(node);
       await exportAsset(node, rec, ctx);
       return rec;

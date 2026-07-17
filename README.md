@@ -230,6 +230,11 @@ A component has broken variants — the plugin skips its properties and continue
 
 ## Changelog
 
+### v1.3.0
+- **Instance visual props** — INSTANCE nodes now export `cornerRadius`, `fills`, `strokes`, and `effects`, capturing designer overrides on placed instances. Previously these were only available on the referenced component's default, which is blind to overrides (real case: a button component with radius 2 whose placed instances render 8).
+- **Mandatory typography & color lookup tables** — the `figma-lookup` skill now requires building a font table (from `font.size`/`font.weight`/`font.token`) and a color table before writing any code, instead of guessing from habit or the screenshot.
+- **TEXT color location documented** — TEXT nodes carry their color under the top-level `color` key (`color.token`/`color.hex`), not `fills[]`; the skill now reads the right field instead of concluding "no color" and guessing.
+
 ### v1.2.0
 - **Per-screen view files** — when a page uses SECTION boards containing many device-sized screen frames, each screen is now emitted as its own `views/<id>.json` + PNG. Previously an agent resolving a nested node had to load the entire multi-screen board (e.g. a 1.1MB, 1,378-node section) and walk it; now it loads just the ~45KB screen. `node-index.json` points nested nodes at their specific screen, while nodes outside any screen (flow arrows, notes) still resolve to the board. Big reduction in tokens per implementation.
 

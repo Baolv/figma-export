@@ -330,6 +330,9 @@ export async function nodeToRecord(
     if (Object.keys(props).length) rec.props = props;
     const overrides = textOverridesOf(inst);
     if (Object.keys(overrides).length) rec.overrides = overrides;
+    // Instance-level visual props (cornerRadius, fills, strokes, effects) —
+    // these capture designer overrides that the referenced component can't.
+    await applyVisualProps(rec, node, ctx);
     rec.layout = getLayout(node);
     await exportAsset(node, rec, ctx); // attaches asset paths if applicable
     return rec;

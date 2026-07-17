@@ -97,10 +97,36 @@ Entries are keyed by the component's stable `key` (from `components.json`) — t
 - Whenever you confirm a new match (via the asset pipeline below, or by finding an existing project component for an INSTANCE), **append it to the code map** (create the `code-maps/` directory and file if missing). Every implementation makes the next one faster.
 - If an entry's `path` no longer exists in the project, treat it as a miss and re-match (then update the entry).
 
+**Typography — mandatory pre-code lookup.** Before writing any label, button, or text code, walk every TEXT node in the subtree and build this table. Do not skip this step — guessing or defaulting to a habitual style (e.g. "body") is a known recurring error.
+
+| Text content (truncated) | `font.size` | `font.weight` | `font.token` (if present) | Project typography token |
+|---|---|---|---|---|
+| … | 14 | 400 | `ios.body-2.regular` | *(map from project design system)* |
+| … | 24 | 700 | — | *(map from project design system)* |
+
+Fill this table from the Figma JSON (`font.size` and `font.weight` on each TEXT node; `font.token` when the text is bound to a text style). Then map each row to the project's own typography tokens — check the project's design-system docs or token definitions if they exist. Only after the table is complete, write code. Never assume a size or weight from context or habit.
+
+**Colors — mandatory pre-code lookup.** For every node that carries a color, build a table before writing code. **Where the color lives depends on the node type:**
+
+- **TEXT nodes**: the text color is under the top-level **`color`** key (`color.token` / `color.hex`) — TEXT nodes in this export do NOT use `fills[]`. Reading only `fills` on a TEXT node yields "no color" and leads to guessing from the screenshot (a known real error: mid-grey body text misread as near-black).
+- **Frames/shapes** (backgrounds, borders): read `fills[].token` / `fills[].hex` and `strokes[]`.
+
+| Node / element | `color.token` (TEXT) / `fills[].token` (shapes) or hex | Project color token |
+|---|---|---|
+| … | `text.secondary` / `#666666` | *(map from project design system)* |
+
+Prefer the token (`color.token` for TEXT, `fills[].token` for shapes) and map it to the project's color tokens; fall back to the `hex` only if the token is missing. If neither exists on the node, say so explicitly and ask rather than guessing from the screenshot. Never hard-code hex strings when the project has a token system. Do not write any color value in code until the table is complete.
+
+**Corner radius on INSTANCE nodes.** Exports made with plugin ≥ 1.3 include `cornerRadius` (plus `fills`, `strokes`, `effects`) directly on INSTANCE nodes, capturing designer overrides — use those values. **Older exports never carry these fields on instances.** For an older export (check `meta.json`'s `exportedAt`, or simply the field being absent), determine an instance's real radius like this:
+
+1. Read the component default from `components.json` — valid only if the instance's `props` variant matches the exported variant, and blind to local overrides.
+2. **Cross-check the view screenshot** (`views/<id>.png`) or the component screenshot: radius 2 vs 8 is clearly visible at button/field size. **If the JSON default and the screenshot disagree, the screenshot wins.**
+3. When still ambiguous, ask the user for a Figma-inspector screenshot of the selected instance rather than guessing.
+
 Then generate code:
 
 - **Spacing:** use `layout.itemSpacing` + `layout.padding` for auto-layout frames; for free-layout frames derive gaps from `box` coordinates (see above).
-- **Tokens:** prefer token names (`color.token`, `font.token`) over raw hex/numbers — they map to the project's design system.
+- **Tokens:** prefer token names (`color.token`, `font.token`) over raw hex/numbers — they map to the project's design system. Use the typography and color tables built above; never a raw value where a token exists.
 - **Components:** `INSTANCE` nodes reference a component in `components.json` via `componentId`. Apply their `props` (variants) and `overrides` (actual text content) on top of the base component.
 - **Assets:** for every node with an `asset` field, check whether the icon/image already exists in the project before copying the export in. **Exception — view-root assets:** if the node carrying the `asset` is the view root itself (or is view-sized), that file is a full-screen handoff render (designers often mark whole screens for export). Treat it as a reference screenshot only — never embed it in the implementation, and skip the matching pipeline for it. Names are unreliable (export filenames get `-1`/`-2` suffixes; projects rename assets) and byte hashes break under re-encoding (SVGO, Xcode asset catalogs, PDF metadata churn) — so the real decision is made by **dimensions + visual comparison**:
 
